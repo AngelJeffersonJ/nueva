@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}{{ tipo.capitalize() }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3>{{ tipo.capitalize() }}</h3>
+  <a class="btn btn-success" href="{{ url_for('entidad_new', tipo=tipo) }}">Nuevo</a>
+</div>
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      {% for c in campos %}
+        <th>{{ c }}</th>
+      {% endfor %}
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in registros %}
+      <tr>
+        {% for c in campos %}
+          <td>{{ r[c] }}</td>
+        {% endfor %}
+        <td>
+          <a class="btn btn-sm btn-primary" href="{{ url_for('entidad_edit', tipo=tipo, pk=r[campos[0]]) }}">✎</a>
+          <form class="d-inline" method="post" action="{{ url_for('entidad_delete', tipo=tipo, pk=r[campos[0]]) }}">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro?')">🗑</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

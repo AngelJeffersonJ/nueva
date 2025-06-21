@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <title>{% block title %}Sistema Servicio Social{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navbar común -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">Servicio Social</a>
@@ -28,10 +26,6 @@
                     {% endif %}
                     {% if R in ['Administrador','Encargado','Maestro'] %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='alumnos') }}">Alumnos</a></li>
-                    {% endif %}
-                    {% if R in ['Administrador', 'Encargado'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('generar_documentos') }}">📄 Generar Documentos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('descargar_documentos') }}">⬇️ Descargar ZIP</a></li>
                     {% endif %}
                 </ul>
                 <span class="navbar-text text-white me-3">
@@ -58,7 +52,6 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Bootstrap JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

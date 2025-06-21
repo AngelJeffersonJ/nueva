@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Inicio{% endblock %}
 {% block content %}
-<div class="text-center">
-  <h2>Bienvenido</h2>
-  <p>Usuario: <strong>{{ usuario.correo }}</strong></p>
-  <p>Rol: <strong>{{ rol }}</strong></p>
-</div>
+<h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
+<p>Rol: {{ usuario.rol }}</p>
+{% if usuario.rol in ['Administrador', 'Encargado'] %}
+<a class="btn btn-info" href="{{ url_for('generar_documentos') }}">Generar Documentos</a>
+<a class="btn btn-warning" href="{{ url_for('descargar_documentos') }}">Descargar Documentos</a>
+{% endif %}
 {% endblock %}
