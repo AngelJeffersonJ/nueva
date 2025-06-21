@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}Formulario - {{ tipo|capitalize }}{% endblock %}
+{% block content %}
+<div class="container">
+  <h3>Formulario de {{ tipo|capitalize }}</h3>
+  <form method="post">
+    {% for campo in campos %}
+      {% if not campo.startswith('TP_') %}
+        <div class="form-group">
+          <label>{{ campo.replace('_',' ') }}</label>
+          <input type="text" name="{{ campo }}" class="form-control"
+                 value="{{ valores.get(campo, '') }}" required>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {% if tp_fields %}
+    <div class="form-group">
+      <label>Tipo de Participación</label>
+      <select class="form-control" name="tipo_participacion" required>
+        <option value="">-- Selecciona una opción --</option>
+        {% for tp in tp_fields %}
+          <option value="{{ tp }}" {% if valores.get(tp)=='X' %}selected{% endif %}>
+            {{ tp.replace('TP_', '').replace('_', ' ') }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+
+    <button class="btn btn-primary">Guardar</button>
+    <a class="btn btn-secondary" href="{{ url_for('entidad_list', tipo=tipo) }}">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
