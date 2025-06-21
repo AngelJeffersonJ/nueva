@@ -2,60 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Sistema Documental{% endblock %}</title>
+    <title>{% block title %}Sistema Servicio Social{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">Sistema Documental</span>
-    {% if session.get('user') %}
-        <span class="navbar-text text-light me-3">{{ session['user']['correo'] }}</span>
-        <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Cerrar sesión</a>
-    {% endif %}
-</nav>
-
-<div class="container-fluid">
-    <div class="row">
-        <aside class="col-md-2 bg-light p-3">
-            <h5>Menú</h5>
-            <ul class="nav flex-column">
-                {% set rol = session.get('user', {}).get('rol', '') %}
-                {% if rol in ['Administrador', 'Encargado'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='usuarios') }}">Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='profesores') }}">Profesores</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='areas') }}">Áreas</a></li>
-                {% endif %}
-                {% if rol in ['Administrador', 'Encargado', 'Maestro'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='alumnos') }}">Alumnos</a></li>
-                {% endif %}
-                {% if rol == 'Administrador' %}
-                    <li class="nav-item mt-3"><strong>Documentos</strong></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('generar_documentos') }}">📝 Generar documentos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('descargar_documentos') }}">📦 Descargar ZIP</a></li>
-                {% endif %}
-            </ul>
-        </aside>
-
-        <main class="col-md-10 p-4">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-
-            {% if request.endpoint != 'dashboard' %}
-              <div class="mb-3">
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">← Regresar al Dashboard</a>
-              </div>
+    <!-- Navbar común -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Servicio Social</a>
+            {% if session.get('user') %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% set R = session['user']['rol'] %}
+                    {% if R in ['Administrador','Encargado'] %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('areas_list') }}">Áreas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('profesores_list') }}">Profesores</a></li>
+                    {% endif %}
+                    {% if R == 'Administrador' %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('usuarios_list') }}">Usuarios</a></li>
+                    {% endif %}
+                    {% if R in ['Administrador','Encargado','Maestro'] %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('alumnos_list') }}">Alumnos</a></li>
+                    {% endif %}
+                </ul>
+                <span class="navbar-text text-white me-3">
+                    Hola, {{ session['user']['name'] or session['user']['correo'] }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Cerrar sesión</a>
+            </div>
+            {% else %}
+            <div class="d-flex">
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light ms-auto">Iniciar sesión</a>
+            </div>
             {% endif %}
+        </div>
+    </nav>
 
-            {% block content %}{% endblock %}
-        </main>
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

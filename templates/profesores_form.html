@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}Profesor{% endblock %}
+{% block content %}
+<h3>{% if profesor.correo %}Editar Profesor{% else %}Nuevo Profesor{% endif %}</h3>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Correo</label>
+    <input type="email" name="correo" class="form-control"
+      value="{{ profesor.correo or '' }}" {% if profesor.correo %}readonly{% endif %} required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input type="text" name="nombre" class="form-control"
+      value="{{ profesor.nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Área</label>
+    <input type="text" name="area" class="form-control"
+      value="{{ profesor.area or '' }}">
+  </div>
+  <button class="btn btn-primary">Guardar</button>
+  <a href="{{ url_for('profesores_list') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

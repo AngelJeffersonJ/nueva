@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}Áreas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-2">
+  <h3>Áreas</h3>
+  <a class="btn btn-success" href="{{ url_for('areas_new') }}">Nueva Área</a>
+</div>
+<table class="table table-striped">
+  <thead><tr><th>Nombre</th><th>Encargado</th><th>Acciones</th></tr></thead>
+  <tbody>
+  {% for a in areas %}
+    <tr>
+      <td>{{a.nombre}}</td><td>{{a.encargado}}</td>
+      <td>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('areas_edit',id=a.id) }}">✎</a>
+        <form class="d-inline" method="post" action="{{ url_for('areas_delete',id=a.id) }}">
+          <button class="btn btn-sm btn-danger">🗑</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

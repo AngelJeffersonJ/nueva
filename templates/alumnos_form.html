@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block title %}Alumno{% endblock %}
+{% block content %}
+<h3>{% if alumno.correo %}Editar Alumno{% else %}Nuevo Alumno{% endif %}</h3>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Correo</label>
+    <input type="email" name="correo" class="form-control"
+      value="{{ alumno.correo or '' }}" {% if alumno.correo %}readonly{% endif %} required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input type="text" name="nombre" class="form-control"
+      value="{{ alumno.nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Área</label>
+    <input type="text" name="area" class="form-control"
+      value="{{ alumno.area or '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Profesor</label>
+    <input type="email" name="profesor" class="form-control"
+      value="{{ alumno.profesor or '' }}">
+  </div>
+  <button class="btn btn-primary">Guardar</button>
+  <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
