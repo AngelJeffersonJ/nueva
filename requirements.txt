@@ -1,0 +1,5 @@
+Flask
+msal
+pandas
+python-docxtpl
+deta

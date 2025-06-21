@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% set u = usuario or {} %}
+<div class="text-center">
+    <h1 class="display-5">Bienvenido</h1>
+    <p><strong>Usuario:</strong> {{ u.correo }}</p>
+    <p><strong>Rol:</strong> {{ u.rol }}</p>
+    <p><strong>Área:</strong> {{ u.area }}</p>
+</div>
+
+<div class="text-center mt-4">
+  {% if u.rol == 'Administrador' %}
+    <a href="{{ url_for('generar') }}" class="btn btn-outline-success me-2">Generar documentos Word</a>
+    <a href="{{ url_for('descargar') }}" class="btn btn-outline-primary">Descargar ZIP de documentos</a>
+  {% elif u.rol == 'Encargado' %}
+    <a href="{{ url_for('generar') }}" class="btn btn-outline-success">Generar documentos de mi área</a>
+  {% elif u.rol == 'Maestro' %}
+    <a href="{{ url_for('generar') }}" class="btn btn-outline-success">Generar documentos de mis alumnos</a>
+  {% elif u.rol == 'Alumno' %}
+    <a href="{{ url_for('generar') }}" class="btn btn-outline-success">Descargar mi documento</a>
+  {% endif %}
+</div>
+{% endblock %}
