@@ -6,42 +6,67 @@ app.py – Flask + MSAL + CSV (producción)
 • Control de acceso por rol
 """
 
-from flask import Flask, render_template, session, redirect, url_for, request, flash
+from flask import (
+    Flask, render_template, session, redirect, url_for, request, flash
+)
 from dotenv import load_dotenv
 import msal, csv, os, uuid
 
-# ── 1. Cargar variables de entorno ------------------------------------------------
-load_dotenv()  # lee el .env si existe
-
-# ── 2. Instancia Flask ------------------------------------------------------------
-app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET", "clave_segura")  # ¡cámbialo en producción!
-
-# ── 3. Configuración Azure AD -----------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 1. Variables de entorno                                              ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+load_dotenv()                                   # lee el .env en local
 CLIENT_ID     = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 TENANT_ID     = os.getenv("TENANT_ID")
-AUTHORITY     = f"https://login.microsoftonline.com/{TENANT_ID}"
-REDIRECT_URI  = os.getenv("REDIRECT_URI", "http://localhost:5000/getAToken")
-SCOPE         = ["User.Read"]
 
-# ── 4. Rutas a CSV ----------------------------------------------------------------
+for name, value in {
+        "CLIENT_ID": CLIENT_ID,
+        "CLIENT_SECRET": CLIENT_SECRET,
+        "TENANT_ID": TENANT_ID}.items():
+    if not value:
+        raise RuntimeError(f"Variable de entorno {name} faltante")
+
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 2. Instancia Flask & secreto                                         ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET", "💥-cambia-este-secreto-💥")
+
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 3. Azure AD (MSAL)                                                   ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
+# REDIRECT_URI:   ① usa la env-var si existe
+#                 ② si estamos en Render, la calcula automáticamente
+#                 ③ por defecto localhost
+REDIRECT_URI = os.getenv("REDIRECT_URI")
+if not REDIRECT_URI:
+    host = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+    REDIRECT_URI = f"https://{host}/getAToken" if host \
+                   else "http://localhost:5000/getAToken"
+
+SCOPE = ["User.Read"]
+
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 4. CSV – rutas                                                       ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 CSV_DIR         = os.getenv("CSV_DIR", "csv")
 USUARIOS_CSV    = f"{CSV_DIR}/usuarios.csv"
 AREAS_CSV       = f"{CSV_DIR}/areas.csv"
 PROFESORES_CSV  = f"{CSV_DIR}/profesores.csv"
 ALUMNOS_CSV     = f"{CSV_DIR}/alumnos.csv"
 
-# ── 5. Helpers CSV ---------------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 5. CSV – helpers                                                     ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 def cargar_csv(path: str) -> list[dict]:
-    """Devuelve una lista de dicts leída del CSV, o [] si no existe."""
     if os.path.exists(path):
         with open(path, newline="", encoding="utf-8") as f:
             return list(csv.DictReader(f))
     return []
 
 def guardar_csv(path: str, rows: list[dict], campos: list[str]) -> None:
-    """Sobrescribe el CSV con los registros indicados."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=campos)
@@ -49,27 +74,24 @@ def guardar_csv(path: str, rows: list[dict], campos: list[str]) -> None:
         w.writerows(rows)
 
 def usuario_desde_csv(email: str) -> dict | None:
-    """Busca al usuario en usuarios.csv; si existe devuelve su perfil."""
     for u in cargar_csv(USUARIOS_CSV):
         if u["correo"].strip().lower() == email.lower():
             return {"correo": u["correo"], "rol": u["rol"], "area": u.get("area", "")}
     return None
 
 def validar_acceso(roles: list[str]) -> bool:
-    """True si el usuario actual está logueado y tiene un rol permitido."""
     u = session.get("user")
-    return u and u.get("rol") in roles
+    return bool(u and u.get("rol") in roles)
 
-# ── 6. MSAL: login / callback / logout -------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 6. MSAL: login / callback / logout                                   ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.route("/login")
 def login():
     msal_app = msal.ConfidentialClientApplication(
         CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
     )
-    auth_url = msal_app.get_authorization_request_url(
-        scopes=SCOPE,
-        redirect_uri=REDIRECT_URI
-    )
+    auth_url = msal_app.get_authorization_request_url(SCOPE, redirect_uri=REDIRECT_URI)
     return redirect(auth_url)
 
 @app.route("/getAToken")
@@ -86,7 +108,6 @@ def authorized():
         code, scopes=SCOPE, redirect_uri=REDIRECT_URI
     )
 
-    # ── Manejo de error MSAL
     if "error" in result:
         return f"Error MSAL: {result.get('error_description')}", 500
 
@@ -94,11 +115,10 @@ def authorized():
     email  = claims.get("preferred_username", "").lower()
 
     if not email.endswith("@aguascalientes.tecnm.mx"):
-        return "Solo se permiten cuentas institucionales", 403
+        return "Solo se permiten cuentas @aguascalientes.tecnm.mx", 403
 
     perfil = usuario_desde_csv(email) or {"correo": email, "rol": "Alumno", "area": ""}
 
-    # Guardar sesión
     session["user"] = {
         "correo": perfil["correo"],
         "rol":    perfil["rol"],
@@ -110,12 +130,12 @@ def authorized():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(
-        f"{AUTHORITY}/oauth2/v2.0/logout"
-        f"?post_logout_redirect_uri={url_for('login', _external=True)}"
-    )
+    return redirect(f"{AUTHORITY}/oauth2/v2.0/logout"
+                    f"?post_logout_redirect_uri={url_for('login', _external=True)}")
 
-# ── 7. Dashboard -----------------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 7. Dashboard                                                         ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.route("/")
 @app.route("/dashboard")
 def dashboard():
@@ -123,7 +143,9 @@ def dashboard():
         return redirect(url_for("login"))
     return render_template("dashboard.html", usuario=session["user"])
 
-# ── 8. CRUD: Usuarios ------------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 8. CRUD: Usuarios                                                    ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.route("/usuarios")
 def usuarios_list():
     if not validar_acceso(["Administrador"]):
@@ -151,7 +173,7 @@ def usuarios_edit(correo):
     if not validar_acceso(["Administrador"]):
         return redirect(url_for("dashboard"))
     rows = cargar_csv(USUARIOS_CSV)
-    u    = next((r for r in rows if r["correo"] == correo), None)
+    u = next((r for r in rows if r["correo"] == correo), None)
     if not u:
         return "No existe", 404
     if request.method == "POST":
@@ -168,7 +190,9 @@ def usuarios_delete(correo):
     guardar_csv(USUARIOS_CSV, rows, ["correo", "rol", "area"])
     return redirect(url_for("usuarios_list"))
 
-# ── 9. CRUD: Áreas ---------------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 9. CRUD: Áreas                                                       ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.route("/areas")
 def areas_list():
     if not validar_acceso(["Administrador", "Encargado"]):
@@ -213,7 +237,9 @@ def areas_delete(id):
     guardar_csv(AREAS_CSV, rows, ["id", "nombre", "encargado"])
     return redirect(url_for("areas_list"))
 
-# ── 10. CRUD: Profesores ---------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 10. CRUD: Profesores                                                 ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.route("/profesores")
 def profesores_list():
     if not validar_acceso(["Administrador", "Encargado"]):
@@ -241,7 +267,7 @@ def profesores_edit(correo):
     if not validar_acceso(["Administrador", "Encargado"]):
         return redirect(url_for("dashboard"))
     rows = cargar_csv(PROFESORES_CSV)
-    p    = next((r for r in rows if r["correo"] == correo), None)
+    p = next((r for r in rows if r["correo"] == correo), None)
     if not p:
         return "No existe", 404
     if request.method == "POST":
@@ -258,14 +284,16 @@ def profesores_delete(correo):
     guardar_csv(PROFESORES_CSV, rows, ["correo", "nombre", "area"])
     return redirect(url_for("profesores_list"))
 
-# ── 11. CRUD: Alumnos ------------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 11. CRUD: Alumnos                                                   ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.route("/alumnos")
 def alumnos_list():
     if not validar_acceso(["Administrador", "Encargado", "Maestro"]):
         flash("Acceso denegado", "danger")
         return redirect(url_for("dashboard"))
     rows = cargar_csv(ALUMNOS_CSV)
-    u    = session["user"]
+    u = session["user"]
     if u["rol"] == "Maestro":
         rows = [r for r in rows if r["profesor"] == u["correo"]]
     if u["rol"] == "Encargado":
@@ -293,7 +321,7 @@ def alumnos_edit(correo):
     if not validar_acceso(["Administrador", "Encargado", "Maestro"]):
         return redirect(url_for("dashboard"))
     rows = cargar_csv(ALUMNOS_CSV)
-    a    = next((r for r in rows if r["correo"] == correo), None)
+    a = next((r for r in rows if r["correo"] == correo), None)
     if not a:
         return "No existe", 404
     if request.method == "POST":
@@ -314,12 +342,16 @@ def alumnos_delete(correo):
     guardar_csv(ALUMNOS_CSV, rows, ["correo", "nombre", "area", "profesor"])
     return redirect(url_for("alumnos_list"))
 
-# ── 12. Error 404 ---------------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 12. Error 404                                                       ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
 
-# ── 13. Arranque local ----------------------------------------------------------
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║ 13. Arranque                                                        ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))   # Render define PORT automáticamente
+    port = int(os.getenv("PORT", 5000))           # Render inyecta PORT
     app.run(host="0.0.0.0", port=port, debug=False)
