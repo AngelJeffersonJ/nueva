@@ -27,7 +27,7 @@ ALUMNOS_CSV     = os.path.join(CSV_DIR, 'alumnos.csv')
 
 TEMPLATE_SOLICITUD   = os.path.join(BASE_PATH, 'plantillas', 'plantilla_solicitud_completa.docx')
 TEMPLATE_BIMESTRAL   = os.path.join(BASE_PATH, 'plantillas', 'Reporte_Bimestral_Plantilla.docx')
-TEMPLATE_FINAL       = os.path.join(BASE_PATH, 'plantillas', 'Reporte_Final_Plantilla.docx')
+TEMPLATE_FINAL       = os.path.join(BASE_PATH, 'plantillas', 'Reporte_Final_Lleno.docx')
 OUTPUT_DIR           = os.path.join(BASE_PATH, 'documentos_generados')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
