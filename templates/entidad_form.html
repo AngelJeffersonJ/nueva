@@ -1,27 +1,24 @@
 {% extends "layout.html" %}
-{% block title %}{{ tipo.capitalize() }} - Formulario{% endblock %}
+{% block title %}{{ valores and 'Editar' or 'Nuevo' }} {{ tipo|capitalize }}{% endblock %}
 {% block content %}
-<h3>{{ tipo.capitalize() }} - Formulario</h3>
+<h3>{{ valores and 'Editar' or 'Nuevo' }} {{ tipo|capitalize }}</h3>
 <form method="post">
-  {% for c in campos %}
-    {% if not c.startswith('TP_') %}
-      <div class="mb-3">
-        <label class="form-label">{{ c }}</label>
-        <input type="text" class="form-control" name="{{ c }}" value="{{ valores.get(c, '') }}">
+  <div class="row">
+    {% for campo in campos %}
+      <div class="col-md-6 mb-3">
+        <label class="form-label">{{ campo.replace('_',' ')|capitalize }}</label>
+        <input
+          type="text"
+          name="{{ campo }}"
+          class="form-control"
+          value="{{ valores.get(campo, '') }}"
+          {% if valores and loop.first %} readonly {% endif %}
+          required
+        >
       </div>
-    {% endif %}
-  {% endfor %}
-  {% if tp_fields %}
-  <div class="mb-3">
-    <label class="form-label">Tipo de Participación</label>
-    <select class="form-select" name="tipo_participacion">
-      {% for f in tp_fields %}
-      <option value="{{ f }}" {% if valores.get(f) == 'X' %}selected{% endif %}>{{ f }}</option>
-      {% endfor %}
-    </select>
+    {% endfor %}
   </div>
-  {% endif %}
-  <button type="submit" class="btn btn-primary">Guardar</button>
+  <button class="btn btn-primary">Guardar</button>
   <a href="{{ url_for('entidad_list', tipo=tipo) }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
