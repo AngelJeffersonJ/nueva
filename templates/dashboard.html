@@ -1,44 +1,74 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
-  <div class="text-center mb-4">
-    <h2>Bienvenido</h2>
-    <p>Usuario: <strong>{{ usuario.correo }}</strong></p>
-    <p>Rol: <strong>{{ usuario.rol }}</strong></p>
-  </div>
+<div class="text-center mb-4">
+  <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
+  <p>Rol: <strong>{{ usuario.rol }}</strong></p>
+</div>
 
-  <!-- Gestión de entidades -->
-  <div class="d-flex justify-content-center flex-wrap mb-4">
-    {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-      <a class="btn btn-primary m-2" href="{{ url_for('entidad_list', tipo='alumnos') }}">Gestionar Alumnos</a>
-    {% endif %}
-    {% if usuario.rol in ['Administrador','Encargado'] %}
-      <a class="btn btn-primary m-2" href="{{ url_for('entidad_list', tipo='areas') }}">Gestionar Áreas</a>
-      <a class="btn btn-primary m-2" href="{{ url_for('entidad_list', tipo='profesores') }}">Gestionar Profesores</a>
-    {% endif %}
-    {% if usuario.rol == 'Administrador' %}
-      <a class="btn btn-primary m-2" href="{{ url_for('entidad_list', tipo='usuarios') }}">Gestionar Usuarios</a>
-    {% endif %}
-  </div>
+<div class="d-flex justify-content-center mb-5">
+  {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
+    <a href="{{ url_for('alumnos_list') }}" class="btn btn-outline-primary mx-2">Gestionar Alumnos</a>
+  {% endif %}
+  {% if usuario.rol in ['Administrador','Encargado'] %}
+    <a href="{{ url_for('profesores_list') }}" class="btn btn-outline-primary mx-2">Gestionar Profesores</a>
+    <a href="{{ url_for('areas_list') }}" class="btn btn-outline-primary mx-2">Gestionar Áreas</a>
+  {% endif %}
+  {% if usuario.rol == 'Administrador' %}
+    <a href="{{ url_for('usuarios_list') }}" class="btn btn-outline-primary mx-2">Gestionar Usuarios</a>
+  {% endif %}
+</div>
 
-  <hr>
-
-  <!-- Generación de documentos -->
-  <div class="text-center">
-    <h4>Generar Documentos</h4>
-    <a class="btn btn-outline-success m-2"
-       href="{{ url_for('generar_solicitud', no_control=usuario.correo) }}">
-      Solicitud
-    </a>
-    {% for b in [1,2,3] %}
-      <a class="btn btn-outline-success m-2"
-         href="{{ url_for('generar_bimestral', bimestre=b, no_control=usuario.correo) }}">
-        Bimestre {{ b }}
-      </a>
+<h3>Generar Documentos</h3>
+<p>Seleccione alumno y tipo de documento:</p>
+<table class="table table-striped">
+  <thead class="table-dark">
+    <tr>
+      <th>Alumno</th>
+      <th>Solicitud</th>
+      <th>Bim. 1</th>
+      <th>Bim. 2</th>
+      <th>Bim. 3</th>
+      <th>Final</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in alumnos %}
+    <tr>
+      <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
+      <td>
+        <a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}"
+           class="btn btn-sm btn-success">
+          Solicitud
+        </a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_bimestral', periodo=1, no_control=a.No_Control) }}"
+           class="btn btn-sm btn-primary">
+          Bim. 1
+        </a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_bimestral', periodo=2, no_control=a.No_Control) }}"
+           class="btn btn-sm btn-primary">
+          Bim. 2
+        </a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_bimestral', periodo=3, no_control=a.No_Control) }}"
+           class="btn btn-sm btn-primary">
+          Bim. 3
+        </a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_final', no_control=a.No_Control) }}"
+           class="btn btn-sm btn-warning">
+          Final
+        </a>
+      </td>
+    </tr>
     {% endfor %}
-    <a class="btn btn-outline-success m-2"
-       href="{{ url_for('generar_final', no_control=usuario.correo) }}">
-      Reporte Final
-    </a>
-  </div>
+  </tbody>
+</table>
 {% endblock %}

@@ -1,22 +1,22 @@
 import os
-import uuid
 import csv
+import uuid
 import zipfile
+import msal
+import pandas as pd
 
 from io import BytesIO
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, flash, send_file
 )
-import msal
-import pandas as pd
 from docxtpl import DocxTemplate
 
-# ─── 1. Configuración de la aplicación ─────────────────────────────────────
+# ─── Configuración de la aplicación ───────────────────────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "clave_segura")
 
-# ─── 2. Azure AD (MSAL) ─────────────────────────────────────────────────────
+# ─── Azure AD (MSAL) ──────────────────────────────────────────────────────────
 CLIENT_ID     = os.environ.get("CLIENT_ID",     "tu_client_id")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "tu_client_secret")
 TENANT_ID     = os.environ.get("TENANT_ID",     "tu_tenant_id")
@@ -24,49 +24,22 @@ AUTHORITY     = f"https://login.microsoftonline.com/{TENANT_ID}"
 REDIRECT_URI  = os.environ.get("REDIRECT_URI",  "http://localhost:5000/getAToken")
 SCOPE         = ["User.Read"]
 
-# ─── 3. Rutas de CSV y plantillas ───────────────────────────────────────────
-BASE_PATH      = os.path.dirname(__file__)
-CSV_DIR        = os.environ.get("CSV_DIR", "csv")
+# ─── Rutas de CSV y plantillas ────────────────────────────────────────────────
+BASE_PATH     = os.path.dirname(__file__)
+CSV_DIR       = os.environ.get("CSV_DIR", "csv")
 USUARIOS_CSV   = os.path.join(BASE_PATH, CSV_DIR, "usuarios.csv")
 AREAS_CSV      = os.path.join(BASE_PATH, CSV_DIR, "areas.csv")
 PROFESORES_CSV = os.path.join(BASE_PATH, CSV_DIR, "profesores.csv")
 ALUMNOS_CSV    = os.path.join(BASE_PATH, CSV_DIR, "alumnos.csv")
 
-PLANTILLA_SOLICITUD  = os.path.join(BASE_PATH, "plantillas", "plantilla_solicitud_completa.docx")
-PLANTILLA_BIMESTRAL1 = os.path.join(BASE_PATH, "plantillas", "Reporte_Bimestral_Plantilla.docx")
-PLANTILLA_FINAL      = os.path.join(BASE_PATH, "plantillas", "Reporte_Final_Plantilla.docx")
+PLANTILLA_SOLICITUD = os.path.join(BASE_PATH, "plantillas", "plantilla_solicitud_completa.docx")
+PLANTILLA_BIMESTRAL = os.path.join(BASE_PATH, "plantillas", "Reporte_Bimestral_Plantilla.docx")
+PLANTILLA_FINAL     = os.path.join(BASE_PATH, "plantillas", "Reporte_Final_Plantilla.docx")
 
 DOCUMENTOS_DIR = os.path.join(BASE_PATH, "documentos_generados")
 os.makedirs(DOCUMENTOS_DIR, exist_ok=True)
 
-# ─── 4. Campos de CSV de alumnos (único CSV compartido) ────────────────────
-CAMPOS_ALUMNOS = [
-    # Datos básicos
-    "Apellido_Paterno","Apellido_Materno","Nombre","Sexo","Telefono","Correo","Domicilio","No_Control",
-    "Carrera","Periodo","Semestre","Creditos","Dependencia","Domicilio_Dependencia","Titular_Dependencia",
-    "Cargo_Responsable","Responsable_Proyecto","Nombre_Programa",
-    "Modalidad_Externa","Modalidad_Interna","Fecha_Inicio","Fecha_Terminacion","Actividades",
-    # Casillas tipo participación
-    "TP_Edu_Adultos","TP_Deportivo","TP_Civico","TP_Salud","TP_Otros",
-    "TP_Desarrollo","TP_Cultural","TP_Sustentable","TP_Medio_Amb",
-    # Fechas de solicitud
-    "Dia_Solicitud","Mes_Solicitud","Anio_Solicitud",
-    # Campos para reporte bimestral
-    "día1","mes1","año1","dia2","mes2","año2",
-    "Nombre_supervisor","Puesto_supervisor",
-    "Actividad_1","Actividad_2","Actividad_3","Actividad_4",
-    "Actividad_5","Actividad_6","Actividad_7","Actividad_8",
-    # Marcas de bimestre
-    "x1","x2","x3",
-    # Campos para reporte final
-    "Actividad1","Logro1","Actividad2","Logro2","Actividad3","Logro3","Actividad4","Logro4",
-    "Actividad5","Logro5","Actividad6","Logro6","Actividad7","Logro7","Actividad8","Logro8",
-    "Aprendizaje1","Beneficio1","Aprendizaje2","Beneficio2","Aprendizaje3","Beneficio3",
-    "Aprendizaje4","Beneficio4","Aprendizaje5","Beneficio5","Aprendizaje6","Beneficio6",
-    "Aprendizaje7","Beneficio7","Aprendizaje8","Beneficio8"
-]
-
-# ─── 5. Funciones auxiliares CSV ────────────────────────────────────────────
+# ─── Funciones auxiliares ────────────────────────────────────────────────────
 def cargar_csv(ruta):
     if os.path.exists(ruta):
         with open(ruta, newline="", encoding="utf-8") as f:
@@ -80,7 +53,6 @@ def guardar_csv(ruta, filas, campos):
         w.writeheader()
         w.writerows(filas)
 
-# ─── 6. Sesión y roles ──────────────────────────────────────────────────────
 def usuario_desde_csv(email):
     for u in cargar_csv(USUARIOS_CSV):
         if u.get("correo","").strip().lower() == email.lower():
@@ -91,7 +63,7 @@ def validar_acceso(roles):
     u = session.get("user")
     return bool(u and u.get("rol") in roles)
 
-# ─── 7. Login / Logout ─────────────────────────────────────────────────────
+# ─── Autenticación MSAL ──────────────────────────────────────────────────────
 @app.route("/login")
 def login():
     msal_app = msal.ConfidentialClientApplication(
@@ -121,7 +93,7 @@ def authorized():
         return f"Error MSAL: {result.get('error_description')}", 500
 
     claims = result.get("id_token_claims", {})
-    email  = claims.get("preferred_username","").lower()
+    email = claims.get("preferred_username","").lower()
     if not email.endswith("@aguascalientes.tecnm.mx"):
         return "Solo cuentas institucionales permitidas", 403
 
@@ -144,7 +116,7 @@ def logout():
         f"?post_logout_redirect_uri={url_for('login', _external=True)}"
     )
 
-# ─── 8. Dashboard ─────────────────────────────────────────────────────────
+# ─── Dashboard ───────────────────────────────────────────────────────────────
 @app.route("/")
 @app.route("/dashboard")
 def dashboard():
@@ -161,7 +133,7 @@ def dashboard():
     elif rol == "Encargado":
         alumnos = [a for a in alumnos if a.get("area")==area]
     elif rol == "Alumno":
-        alumnos = [a for a in alumnos if a.get("Correo","").lower()==correo.lower()]
+        alumnos = [a for a in alumnos if a.get("correo")==correo]
 
     return render_template(
         "dashboard.html",
@@ -169,7 +141,7 @@ def dashboard():
         alumnos=alumnos
     )
 
-# ─── 9. CRUD Usuarios ─────────────────────────────────────────────────────
+# ─── CRUD Usuarios ──────────────────────────────────────────────────────────
 @app.route("/usuarios")
 def usuarios_list():
     if not validar_acceso(["Administrador"]):
@@ -214,7 +186,7 @@ def usuarios_delete(correo):
     guardar_csv(USUARIOS_CSV, filas, ["correo","rol","area"])
     return redirect(url_for("usuarios_list"))
 
-# ─── 10. CRUD Áreas ───────────────────────────────────────────────────────
+# ─── CRUD Áreas ──────────────────────────────────────────────────────────────
 @app.route("/areas")
 def areas_list():
     if not validar_acceso(["Administrador","Encargado"]):
@@ -259,7 +231,7 @@ def areas_delete(id):
     guardar_csv(AREAS_CSV, filas, ["id","nombre","encargado"])
     return redirect(url_for("areas_list"))
 
-# ─── 11. CRUD Profesores ───────────────────────────────────────────────────
+# ─── CRUD Profesores ─────────────────────────────────────────────────────────
 @app.route("/profesores")
 def profesores_list():
     if not validar_acceso(["Administrador","Encargado"]):
@@ -304,7 +276,7 @@ def profesores_delete(correo):
     guardar_csv(PROFESORES_CSV, filas, ["correo","nombre","area"])
     return redirect(url_for("profesores_list"))
 
-# ─── 12. CRUD Alumnos ──────────────────────────────────────────────────────
+# ─── CRUD Alumnos ────────────────────────────────────────────────────────────
 @app.route("/alumnos")
 def alumnos_list():
     if not validar_acceso(["Administrador","Encargado","Maestro"]):
@@ -314,7 +286,7 @@ def alumnos_list():
     rol, correo, area = session["user"]["rol"], session["user"]["correo"], session["user"]["area"]
     if rol=="Maestro":
         filas = [a for a in filas if a.get("profesor")==correo]
-    elif rol=="Encargado":
+    if rol=="Encargado":
         filas = [a for a in filas if a.get("area")==area]
     return render_template("alumnos_list.html", alumnos=filas)
 
@@ -325,12 +297,12 @@ def alumnos_new():
     if request.method=="POST":
         filas = cargar_csv(ALUMNOS_CSV)
         filas.append({
-            "Correo":   request.form["correo"],
-            "Nombre":   request.form["nombre"],
+            "correo":   request.form["correo"],
+            "nombre":   request.form["nombre"],
             "area":     request.form["area"],
             "profesor": request.form["profesor"]
         })
-        guardar_csv(ALUMNOS_CSV, filas, ["Correo","Nombre","area","profesor"])
+        guardar_csv(ALUMNOS_CSV, filas, ["correo","nombre","area","profesor"])
         return redirect(url_for("alumnos_list"))
     return render_template("alumnos_form.html", alumno={})
 
@@ -339,15 +311,15 @@ def alumnos_edit(correo):
     if not validar_acceso(["Administrador","Encargado","Maestro"]):
         return redirect(url_for("dashboard"))
     filas = cargar_csv(ALUMNOS_CSV)
-    a = next((r for r in filas if r.get("Correo")==correo), None)
+    a = next((r for r in filas if r["correo"]==correo), None)
     if not a: return "No existe",404
     if request.method=="POST":
-        a["Nombre"], a["area"], a["profesor"] = (
+        a["nombre"], a["area"], a["profesor"] = (
             request.form["nombre"],
             request.form["area"],
             request.form["profesor"]
         )
-        guardar_csv(ALUMNOS_CSV, filas, ["Correo","Nombre","area","profesor"])
+        guardar_csv(ALUMNOS_CSV, filas, ["correo","nombre","area","profesor"])
         return redirect(url_for("alumnos_list"))
     return render_template("alumnos_form.html", alumno=a)
 
@@ -355,11 +327,11 @@ def alumnos_edit(correo):
 def alumnos_delete(correo):
     if not validar_acceso(["Administrador","Encargado","Maestro"]):
         return redirect(url_for("dashboard"))
-    filas = [r for r in cargar_csv(ALUMNOS_CSV) if r.get("Correo")!=correo]
-    guardar_csv(ALUMNOS_CSV, filas, ["Correo","Nombre","area","profesor"])
+    filas = [r for r in cargar_csv(ALUMNOS_CSV) if r["correo"]!=correo]
+    guardar_csv(ALUMNOS_CSV, filas, ["correo","nombre","area","profesor"])
     return redirect(url_for("alumnos_list"))
 
-# ─── 13. Generación de documentos Word ────────────────────────────────────
+# ─── Generación de documentos ────────────────────────────────────────────────
 def _render_docs(plantilla, sufijo, df, extra=None):
     for _, fila in df.iterrows():
         tpl = DocxTemplate(plantilla)
@@ -374,43 +346,41 @@ def _render_docs(plantilla, sufijo, df, extra=None):
 def generar_solicitud():
     df = pd.read_csv(ALUMNOS_CSV, dtype=str)
     no = request.args.get("no_control")
-    if no:
-        df = df[df["No_Control"]==no]
+    if no: df = df[df["No_Control"]==no]
     _render_docs(PLANTILLA_SOLICITUD, "Solicitud", df)
-    flash("Solicitud(s) generada(s)", "success")
+    flash("Solicitud generada", "success")
     return redirect(url_for("dashboard"))
 
-@app.route("/generar/bimestral/<int:bimestre>")
-def generar_bimestral(bimestre):
+@app.route("/generar/bimestral/<int:periodo>")
+def generar_bimestral(periodo):
     df = pd.read_csv(ALUMNOS_CSV, dtype=str)
     no = request.args.get("no_control")
-    if no:
-        df = df[df["No_Control"]==no]
-    extra = {"Reporte_No": bimestre}
-    # marcas X
-    extra.update({"x1":"X" if bimestre==1 else "",
-                  "x2":"X" if bimestre==2 else "",
-                  "x3":"X" if bimestre==3 else ""})
-    _render_docs(PLANTILLA_BIMESTRAL1, f"Bim{bimestre}", df, extra)
-    flash(f"Bimestre {bimestre} generado", "success")
+    if no: df = df[df["No_Control"]==no]
+    extra = {
+        "Reporte_No": periodo,
+        "x1": "X" if periodo==1 else "",
+        "x2": "X" if periodo==2 else "",
+        "x3": "X" if periodo==3 else ""
+    }
+    _render_docs(PLANTILLA_BIMESTRAL, f"Bim{periodo}", df, extra)
+    flash(f"Bimestre {periodo} generado", "success")
     return redirect(url_for("dashboard"))
 
 @app.route("/generar/final")
 def generar_final():
     df = pd.read_csv(ALUMNOS_CSV, dtype=str)
     no = request.args.get("no_control")
-    if no:
-        df = df[df["No_Control"]==no]
+    if no: df = df[df["No_Control"]==no]
     _render_docs(PLANTILLA_FINAL, "Final", df)
     flash("Reporte final generado", "success")
     return redirect(url_for("dashboard"))
 
-# ─── 14. Error 404 ────────────────────────────────────────────────────────
+# ─── Error 404 ───────────────────────────────────────────────────────────────
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html"), 404
 
-# ─── 15. Inicio ───────────────────────────────────────────────────────────
+# ─── Inicio ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
