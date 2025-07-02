@@ -1,53 +1,63 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+
 <div class="text-center mb-4">
   <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
   <p>Rol: <strong>{{ usuario.rol }}</strong></p>
 </div>
 
-<div class="row g-3 mb-4">
-  {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-    <div class="col-md-4">
-      <a href="{{ url_for('entidad_list', tipo='alumnos') }}" class="btn btn-outline-primary w-100">Gestionar Alumnos</a>
-    </div>
-  {% endif %}
-  {% if usuario.rol in ['Administrador','Encargado'] %}
-    <div class="col-md-4">
-      <a href="{{ url_for('entidad_list', tipo='profesores') }}" class="btn btn-outline-primary w-100">Gestionar Profesores</a>
-    </div>
-    <div class="col-md-4">
-      <a href="{{ url_for('entidad_list', tipo='areas') }}" class="btn btn-outline-primary w-100">Gestionar Áreas</a>
-    </div>
-  {% endif %}
-  {% if usuario.rol == 'Administrador' %}
-    <div class="col-md-4">
-      <a href="{{ url_for('entidad_list', tipo='usuarios') }}" class="btn btn-outline-primary w-100">Gestionar Usuarios</a>
-    </div>
-  {% endif %}
+<div class="d-flex justify-content-center mb-4">
+  <a href="{{ url_for('entidad_list', tipo='alumnos') }}" class="btn btn-outline-primary mx-2">Gestionar Alumnos</a>
+  <a href="{{ url_for('entidad_list', tipo='profesores') }}" class="btn btn-outline-primary mx-2">Gestionar Profesores</a>
+  <a href="{{ url_for('entidad_list', tipo='areas') }}" class="btn btn-outline-primary mx-2">Gestionar Áreas</a>
 </div>
 
-<div class="mb-3">
-  <h4>Generar Documentos</h4>
-  <p>Seleccione alumno y tipo de documento:</p>
-</div>
-<table class="table table-bordered">
-  <thead class="table-dark">
+<h4>Generar Documentos</h4>
+<p>Seleccione alumno y tipo de documento:</p>
+
+<table class="table table-striped">
+  <thead class="thead-dark">
     <tr>
-      <th>Alumno</th><th>Solicitud</th><th>Bim. 1</th><th>Bim. 2</th><th>Bim. 3</th><th>Final</th>
+      <th>Alumno</th>
+      <th>Solicitud</th>
+      <th>Bim. 1</th>
+      <th>Bim. 2</th>
+      <th>Bim. 3</th>
+      <th>Final</th>
     </tr>
   </thead>
   <tbody>
     {% for a in alumnos %}
     <tr>
       <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
-      <td><a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}" class="btn btn-sm btn-success">Solicitud</a></td>
-      <td><a href="{{ url_for('generar_bimestral', no_control=a.No_Control, bimestre=1) }}" class="btn btn-sm btn-info">1</a></td>
-      <td><a href="{{ url_for('generar_bimestral', no_control=a.No_Control, bimestre=2) }}" class="btn btn-sm btn-info">2</a></td>
-      <td><a href="{{ url_for('generar_bimestral', no_control=a.No_Control, bimestre=3) }}" class="btn btn-sm btn-info">3</a></td>
-      <td><a href="{{ url_for('generar_final', no_control=a.No_Control) }}" class="btn btn-sm btn-warning">Final</a></td>
+      <td>
+        <a href="{{ url_for('generar_solicitud') }}?no_control={{ a.No_Control }}"
+           class="btn btn-sm btn-primary">Solicitud</a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_bimestral', periodo=1) }}?no_control={{ a.No_Control }}"
+           class="btn btn-sm btn-secondary">Bim. 1</a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_bimestral', periodo=2) }}?no_control={{ a.No_Control }}"
+           class="btn btn-sm btn-secondary">Bim. 2</a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_bimestral', periodo=3) }}?no_control={{ a.No_Control }}"
+           class="btn btn-sm btn-secondary">Bim. 3</a>
+      </td>
+      <td>
+        <a href="{{ url_for('generar_final') }}?no_control={{ a.No_Control }}"
+           class="btn btn-sm btn-success">Final</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="6" class="text-center">No hay alumnos disponibles.</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}
