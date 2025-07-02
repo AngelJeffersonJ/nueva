@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Área{% endblock %}
+{% block content %}
+<h3>{% if area.id %}Editar{% else %}Nueva{% endif %} Área</h3>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input name="nombre" class="form-control" value="{{ area.nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Encargado (correo)</label>
+    <input name="encargado" class="form-control" value="{{ area.encargado or '' }}">
+  </div>
+  <button class="btn btn-primary">Guardar</button>
+  <a href="{{ url_for('areas_list') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

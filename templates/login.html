@@ -1,7 +1,16 @@
 {% extends "layout.html" %}
 {% block title %}Iniciar Sesión{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-center">
-  <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Iniciar sesión con Microsoft</a>
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <h5 class="card-title">Acceso</h5>
+        <form action="{{ url_for('login') }}" method="get">
+          <button class="btn btn-primary w-100">Iniciar con Microsoft</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

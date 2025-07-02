@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3>Usuarios</h3>
+  <a href="{{ url_for('usuarios_new') }}" class="btn btn-success">Nuevo Usuario</a>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr><th>Correo</th><th>Rol</th><th>Área</th><th>Acciones</th></tr>
+  </thead>
+  <tbody>
+    {% for u in usuarios %}
+    <tr>
+      <td>{{ u.correo }}</td>
+      <td>{{ u.rol }}</td>
+      <td>{{ u.area }}</td>
+      <td>
+        <a href="{{ url_for('usuarios_edit', correo=u.correo) }}" class="btn btn-sm btn-primary">✎</a>
+        <form action="{{ url_for('usuarios_delete', correo=u.correo) }}" method="post" class="d-inline">
+          <button class="btn btn-sm btn-danger">🗑</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

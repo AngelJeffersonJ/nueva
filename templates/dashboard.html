@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
 <div class="text-center mb-4">
   <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
@@ -20,55 +19,46 @@
   {% endif %}
 </div>
 
-<h3>Generar Documentos</h3>
-<p>Seleccione alumno y tipo de documento:</p>
-<table class="table table-striped">
-  <thead class="table-dark">
-    <tr>
-      <th>Alumno</th>
-      <th>Solicitud</th>
-      <th>Bim. 1</th>
-      <th>Bim. 2</th>
-      <th>Bim. 3</th>
-      <th>Final</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for a in alumnos %}
-    <tr>
-      <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
-      <td>
-        <a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}"
-           class="btn btn-sm btn-success">
-          Solicitud
-        </a>
-      </td>
-      <td>
-        <a href="{{ url_for('generar_bimestral', periodo=1, no_control=a.No_Control) }}"
-           class="btn btn-sm btn-primary">
-          Bim. 1
-        </a>
-      </td>
-      <td>
-        <a href="{{ url_for('generar_bimestral', periodo=2, no_control=a.No_Control) }}"
-           class="btn btn-sm btn-primary">
-          Bim. 2
-        </a>
-      </td>
-      <td>
-        <a href="{{ url_for('generar_bimestral', periodo=3, no_control=a.No_Control) }}"
-           class="btn btn-sm btn-primary">
-          Bim. 3
-        </a>
-      </td>
-      <td>
-        <a href="{{ url_for('generar_final', no_control=a.No_Control) }}"
-           class="btn btn-sm btn-warning">
-          Final
-        </a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
+  <h3>Generar Documentos</h3>
+  <table class="table table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Alumno</th>
+        <th>Solicitud</th>
+        <th>Bim. 1</th>
+        <th>Bim. 2</th>
+        <th>Bim. 3</th>
+        <th>Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in alumnos %}
+      <tr>
+        <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
+        <td>
+          <a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}"
+             class="btn btn-sm btn-success">Solicitud</a>
+        </td>
+        <td>
+          <a href="{{ url_for('generar_bimestral', periodo=1, no_control=a.No_Control) }}"
+             class="btn btn-sm btn-primary">1</a>
+        </td>
+        <td>
+          <a href="{{ url_for('generar_bimestral', periodo=2, no_control=a.No_Control) }}"
+             class="btn btn-sm btn-primary">2</a>
+        </td>
+        <td>
+          <a href="{{ url_for('generar_bimestral', periodo=3, no_control=a.No_Control) }}"
+             class="btn btn-sm btn-primary">3</a>
+        </td>
+        <td>
+          <a href="{{ url_for('generar_final', no_control=a.No_Control) }}"
+             class="btn btn-sm btn-warning">Final</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
 {% endblock %}

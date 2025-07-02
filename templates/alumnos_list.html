@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Alumnos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h3>Alumnos</h3>
+  <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
+</div>
+<table class="table table-striped">
+  <thead><tr><th>Correo</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th></tr></thead>
+  <tbody>
+    {% for a in alumnos %}
+    <tr>
+      <td>{{ a.correo }}</td>
+      <td>{{ a.nombre }}</td>
+      <td>{{ a.area }}</td>
+      <td>{{ a.profesor }}</td>
+      <td>
+        <a href="{{ url_for('alumnos_edit', correo=a.correo) }}" class="btn btn-sm btn-primary">✎</a>
+        <form action="{{ url_for('alumnos_delete', correo=a.correo) }}" method="post" class="d-inline">
+          <button class="btn btn-sm btn-danger">🗑</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
