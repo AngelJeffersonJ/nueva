@@ -2,58 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}Sistema Servicio Social{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>{% block title %}Servicio Social{% endblock %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{{ url_for('dashboard') }}">Servicio Social</a>
-    {% if session.get('user') %}
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('dashboard') }}">Servicio Social</a>
+      {% if session.user %}
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
+      <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto">
-          {% set R = session['user']['rol'] %}
-          {% if R in ['Administrador','Encargado'] %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='areas') }}">Áreas</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='profesores') }}">Profesores</a></li>
-          {% endif %}
-          {% if R == 'Administrador' %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='usuarios') }}">Usuarios</a></li>
-          {% endif %}
-          {% if R in ['Administrador','Encargado','Maestro'] %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('entidad_list', tipo='alumnos') }}">Alumnos</a></li>
+          {% if session.user.rol in ['Administrador','Encargado'] %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('alumnos_list') }}">Alumnos</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('profesores_list') }}">Profesores</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('areas_list') }}">Áreas</a></li>
           {% endif %}
         </ul>
         <span class="navbar-text text-white me-3">
-          Hola, {{ session['user']['name'] or session['user']['correo'] }}
+          Hola, {{ session.user.name or session.user.correo }}
         </span>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Cerrar sesión</a>
+        <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Cerrar sesión</a>
       </div>
-    {% else %}
-      <div class="d-flex">
-        <a href="{{ url_for('login') }}" class="btn btn-outline-light ms-auto">Iniciar sesión</a>
-      </div>
-    {% endif %}
-  </div>
-</nav>
+      {% else %}
+      <a class="btn btn-outline-light ms-auto" href="{{ url_for('login') }}">Iniciar sesión</a>
+      {% endif %}
+    </div>
+  </nav>
 
-<div class="container mt-4">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, msg in messages %}
-        <div class="alert alert-{{ category }}">{{ msg }}</div>
+  <div class="container mt-4">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in msgs %}
+        <div class="alert alert-{{cat}}">{{msg}}</div>
       {% endfor %}
-    {% endif %}
-  {% endwith %}
-  {% block content %}{% endblock %}
-</div>
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
