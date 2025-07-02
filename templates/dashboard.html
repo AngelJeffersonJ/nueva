@@ -1,64 +1,64 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
 <div class="text-center mb-4">
-  <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
+  <h2>Bienvenido</h2>
+  <p>Usuario: <strong>{{ usuario.correo }}</strong></p>
   <p>Rol: <strong>{{ usuario.rol }}</strong></p>
 </div>
 
-<div class="d-flex justify-content-center mb-5">
-  {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-    <a href="{{ url_for('alumnos_list') }}" class="btn btn-outline-primary mx-2">Gestionar Alumnos</a>
-  {% endif %}
-  {% if usuario.rol in ['Administrador','Encargado'] %}
-    <a href="{{ url_for('profesores_list') }}" class="btn btn-outline-primary mx-2">Gestionar Profesores</a>
-    <a href="{{ url_for('areas_list') }}" class="btn btn-outline-primary mx-2">Gestionar Áreas</a>
-  {% endif %}
+<div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+  {# Administrador: botones para todos los ZIP #}
   {% if usuario.rol == 'Administrador' %}
-    <a href="{{ url_for('usuarios_list') }}" class="btn btn-outline-primary mx-2">Gestionar Usuarios</a>
+    <a class="btn btn-primary" href="{{ url_for('generar_zip', tipo='solicitud') }}">Todas las Solicitudes</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b1') }}">Todos Bimestre 1</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b2') }}">Todos Bimestre 2</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b3') }}">Todos Bimestre 3</a>
+    <a class="btn btn-success" href="{{ url_for('generar_zip', tipo='final') }}">Todos Reportes Finales</a>
+
+  {# Jefe/Encargado: mismos botones, pero solo su área (backend ya filtra) #}
+  {% elif usuario.rol == 'Encargado' %}
+    <a class="btn btn-primary" href="{{ url_for('generar_zip', tipo='solicitud') }}">Solicitudes de mi Área</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b1') }}">Bimestre 1 - mi Área</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b2') }}">Bimestre 2 - mi Área</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b3') }}">Bimestre 3 - mi Área</a>
+    <a class="btn btn-success" href="{{ url_for('generar_zip', tipo='final') }}">Reportes Finales - mi Área</a>
+
+  {# Maestro: botones para sus alumnos (backend filtra) #}
+  {% elif usuario.rol == 'Maestro' %}
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b1') }}">Bimestre 1</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b2') }}">Bimestre 2</a>
+    <a class="btn btn-secondary" href="{{ url_for('generar_zip', tipo='b3') }}">Bimestre 3</a>
+    <a class="btn btn-success" href="{{ url_for('generar_zip', tipo='final') }}">Reporte Final</a>
+
+  {# Alumno: descarga individual #}
+  {% else %}
+    <a class="btn btn-primary" href="{{ url_for('descargar_doc_individual', tipo='solicitud') }}">Solicitud</a>
+    <a class="btn btn-secondary" href="{{ url_for('descargar_doc_individual', tipo='b1') }}">Bimestre 1</a>
+    <a class="btn btn-secondary" href="{{ url_for('descargar_doc_individual', tipo='b2') }}">Bimestre 2</a>
+    <a class="btn btn-secondary" href="{{ url_for('descargar_doc_individual', tipo='b3') }}">Bimestre 3</a>
+    <a class="btn btn-success" href="{{ url_for('descargar_doc_individual', tipo='final') }}">Reporte Final</a>
   {% endif %}
 </div>
 
-{% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-  <h3>Generar Documentos</h3>
-  <table class="table table-striped">
-    <thead class="table-dark">
-      <tr>
-        <th>Alumno</th>
-        <th>Solicitud</th>
-        <th>Bim. 1</th>
-        <th>Bim. 2</th>
-        <th>Bim. 3</th>
-        <th>Final</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for a in alumnos %}
-      <tr>
-        <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
-        <td>
-          <a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}"
-             class="btn btn-sm btn-success">Solicitud</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_bimestral', periodo=1, no_control=a.No_Control) }}"
-             class="btn btn-sm btn-primary">1</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_bimestral', periodo=2, no_control=a.No_Control) }}"
-             class="btn btn-sm btn-primary">2</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_bimestral', periodo=3, no_control=a.No_Control) }}"
-             class="btn btn-sm btn-primary">3</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_final', no_control=a.No_Control) }}"
-             class="btn btn-sm btn-warning">Final</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% endif %}
+{# Opcional: listar alumnos en dashboard si quieres verlos #}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>No. Control</th><th>Nombre</th><th>Carrera</th><th>Área</th><th>Profesor</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in alumnos %}
+    <tr>
+      <td>{{ a.No_Control }}</td>
+      <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
+      <td>{{ a.Carrera }}</td>
+      <td>{{ a.area or a.Domicilio_Dependencia }}</td>
+      <td>{{ a.profesor or a.Responsable_Proyecto }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
