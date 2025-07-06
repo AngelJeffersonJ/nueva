@@ -1,64 +1,33 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="text-center mb-4">
-  <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
-  <p>Rol: <strong>{{ usuario.rol }}</strong></p>
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <h3 class="text-center mb-4">Generar Documentos</h3>
+    <div class="mb-3">
+      <label for="no_control" class="form-label">No. de Control</label>
+      <input type="text" id="no_control" class="form-control" placeholder="Ej. 2021001">
+    </div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+      <button class="btn btn-primary" onclick="gen('solicitud')">Solicitud</button>
+      <button class="btn btn-secondary" onclick="genB(1)">Bimestre 1</button>
+      <button class="btn btn-secondary" onclick="genB(2)">Bimestre 2</button>
+      <button class="btn btn-secondary" onclick="genB(3)">Bimestre 3</button>
+      <button class="btn btn-success" onclick="gen('final')">Reporte Final</button>
+    </div>
+  </div>
 </div>
 
-<div class="d-flex justify-content-center mb-5">
-  {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-    <a href="{{ url_for('alumnos_list') }}" class="btn btn-outline-primary mx-2">Gestionar Alumnos</a>
-  {% endif %}
-  {% if usuario.rol in ['Administrador','Encargado'] %}
-    <a href="{{ url_for('profesores_list') }}" class="btn btn-outline-primary mx-2">Gestionar Profesores</a>
-    <a href="{{ url_for('areas_list') }}" class="btn btn-outline-primary mx-2">Gestionar Áreas</a>
-  {% endif %}
-  {% if usuario.rol == 'Administrador' %}
-    <a href="{{ url_for('usuarios_list') }}" class="btn btn-outline-primary mx-2">Gestionar Usuarios</a>
-  {% endif %}
-</div>
-
-{% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-  <h3>Generar Documentos</h3>
-  <table class="table table-striped">
-    <thead class="table-dark">
-      <tr>
-        <th>Alumno</th>
-        <th>Solicitud</th>
-        <th>Bim. 1</th>
-        <th>Bim. 2</th>
-        <th>Bim. 3</th>
-        <th>Final</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for a in alumnos %}
-      <tr>
-        <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
-        <td>
-          <a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}"
-             class="btn btn-sm btn-success">Solicitud</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_bimestral', periodo=1, no_control=a.No_Control) }}"
-             class="btn btn-sm btn-primary">1</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_bimestral', periodo=2, no_control=a.No_Control) }}"
-             class="btn btn-sm btn-primary">2</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_bimestral', periodo=3, no_control=a.No_Control) }}"
-             class="btn btn-sm btn-primary">3</a>
-        </td>
-        <td>
-          <a href="{{ url_for('generar_final', no_control=a.No_Control) }}"
-             class="btn btn-sm btn-warning">Final</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% endif %}
+<script>
+  function gen(tipo) {
+    let nc = document.getElementById('no_control').value.trim();
+    if (!nc) { alert('Ingresa un No. de Control'); return; }
+    window.location.href = '/generar_' + tipo + '/' + nc;
+  }
+  function genB(num) {
+    let nc = document.getElementById('no_control').value.trim();
+    if (!nc) { alert('Ingresa un No. de Control'); return; }
+    window.location.href = '/generar_bimestral/' + num + '/' + nc;
+  }
+</script>
 {% endblock %}
