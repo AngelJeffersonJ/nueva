@@ -1,27 +1,23 @@
 {% extends "layout.html" %}
-{% block title %}Profesor{% endblock %}
-{% block content %}
-  {% set profesor = profesor if profesor is defined else {} %}
+{% block title %}{{ profesor.correo and 'Editar' or 'Nuevo' }} Profesor{% endblock %}
 
-  <h3>{% if profesor.get('correo') %}Editar Profesor{% else %}Nuevo Profesor{% endif %}</h3>
-  <form method="post">
-    <div class="mb-3">
-      <label class="form-label">Correo</label>
-      <input type="email" name="correo" class="form-control"
-             value="{{ profesor.get('correo','') }}"
-             {% if profesor.get('correo') %}readonly{% endif %} required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input type="text" name="nombre" class="form-control"
-             value="{{ profesor.get('nombre','') }}" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Área</label>
-      <input type="text" name="area" class="form-control"
-             value="{{ profesor.get('area','') }}">
-    </div>
-    <button class="btn btn-primary">Guardar</button>
-    <a href="{{ url_for('profesores_list') }}" class="btn btn-secondary">Cancelar</a>
-  </form>
+{% block content %}
+<h3>{{ profesor.correo and 'Editar' or 'Nuevo' }} Profesor</h3>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Correo</label>
+    <input type="email" name="correo" class="form-control"
+           value="{{ profesor.correo or '' }}" {% if profesor.correo %}readonly{% endif %} required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input name="nombre" class="form-control" value="{{ profesor.nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Área</label>
+    <input name="area" class="form-control" value="{{ profesor.area or '' }}">
+  </div>
+  <button class="btn btn-primary">Guardar</button>
+  <a class="btn btn-secondary" href="{{ url_for('profesores_list') }}">Cancelar</a>
+</form>
 {% endblock %}

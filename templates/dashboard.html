@@ -1,9 +1,51 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<div class="text-center">
+<div class="text-center mb-4">
   <h2>Bienvenido</h2>
-  <p>Usuario: <strong>{{ session.user.correo }}</strong></p>
-  <p>Rol: <strong>{{ session.user.rol }}</strong></p>
+  <p><strong>{{ usuario.name }}</strong> ({{ usuario.rol }})</p>
 </div>
+
+<div class="mb-4">
+  {% if usuario.rol in ['Administrador','Jefe'] %}
+    <a href="{{ url_for('areas_list') }}" class="btn btn-outline-primary me-2">Gestionar Áreas</a>
+    <a href="{{ url_for('profesores_list') }}" class="btn btn-outline-primary me-2">Gestionar Profesores</a>
+  {% endif %}
+  {% if usuario.rol == 'Administrador' %}
+    <a href="{{ url_for('usuarios_list') }}" class="btn btn-outline-primary me-2">Gestionar Usuarios</a>
+  {% endif %}
+  {% if usuario.rol in ['Administrador','Jefe','Profesor'] %}
+    <a href="{{ url_for('alumnos_list') }}" class="btn btn-outline-primary">Gestionar Alumnos</a>
+  {% endif %}
+</div>
+
+{% if alumnos %}
+  <h4>Alumnos asignados</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>No. Control</th><th>Nombre</th><th>Carrera</th><th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in alumnos %}
+      <tr>
+        <td>{{ a.No_Control }}</td>
+        <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
+        <td>{{ a.Carrera }}</td>
+        <td>
+          <a href="{{ url_for('generar_solicitud', no_control=a.No_Control) }}" class="btn btn-sm btn-primary">Solicitud</a>
+          <a href="{{ url_for('generar_bimestral', bimestre=1, no_control=a.No_Control) }}" class="btn btn-sm btn-secondary">1er Bim.</a>
+          <a href="{{ url_for('generar_bimestral', bimestre=2, no_control=a.No_Control) }}" class="btn btn-sm btn-secondary">2º Bim.</a>
+          <a href="{{ url_for('generar_bimestral', bimestre=3, no_control=a.No_Control) }}" class="btn btn-sm btn-secondary">3er Bim.</a>
+          <a href="{{ url_for('generar_final', no_control=a.No_Control) }}" class="btn btn-sm btn-success">Final</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No hay alumnos para mostrar.</p>
+{% endif %}
 {% endblock %}

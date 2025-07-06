@@ -1,21 +1,18 @@
 {% extends "layout.html" %}
-{% block title %}{{ valores[campos[0]] and 'Editar' or 'Nuevo' }} {{ tipo|capitalize }}{% endblock %}
-{% block content %}
-<h2>{{ valores[campos[0]] and 'Editar' or 'Nuevo' }} {{ tipo|capitalize }}</h2>
+{% block title %}{{ area.id and 'Editar' or 'Nueva' }} Área{% endblock %}
 
+{% block content %}
+<h3>{{ area.id and 'Editar' or 'Nueva' }} Área</h3>
 <form method="post">
-  <div class="row">
-    {% for campo in campos %}
-      <div class="col-md-6 mb-3">
-        <label class="form-label">{{ campo|capitalize|replace('_',' ') }}</label>
-        <input type="text" name="{{ campo }}" class="form-control"
-               value="{{ valores.get(campo,'') }}"
-               {% if campo=='id' and valores.get(campo) %}readonly{% endif %}
-               {% if campo in ['correo','nombre'] and tipo=='usuarios' %}required{% endif %}>
-      </div>
-    {% endfor %}
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input name="nombre" class="form-control" value="{{ area.nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Encargado (correo)</label>
+    <input name="encargado" class="form-control" value="{{ area.encargado or '' }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
-  <a href="{{ url_for('entidad_list', tipo=tipo) }}" class="btn btn-secondary">Cancelar</a>
+  <a class="btn btn-secondary" href="{{ url_for('areas_list') }}">Cancelar</a>
 </form>
 {% endblock %}

@@ -1,24 +1,36 @@
 {% extends "layout.html" %}
 {% block title %}Alumnos{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between mb-3">
   <h3>Alumnos</h3>
-  <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
+  {% if session.user.rol in ['Administrador','Jefe','Profesor'] %}
+    <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
+  {% endif %}
 </div>
-<table class="table table-striped">
-  <thead><tr><th>Correo</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th></tr></thead>
+<table class="table table-bordered table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>No. Control</th><th>Nombre</th><th>Carrera</th><th>Área</th><th>Profesor</th><th>Acciones</th>
+    </tr>
+  </thead>
   <tbody>
     {% for a in alumnos %}
     <tr>
-      <td>{{ a.correo }}</td>
-      <td>{{ a.nombre }}</td>
+      <td>{{ a.No_Control }}</td>
+      <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
+      <td>{{ a.Carrera }}</td>
       <td>{{ a.area }}</td>
       <td>{{ a.profesor }}</td>
       <td>
-        <a href="{{ url_for('alumnos_edit', correo=a.correo) }}" class="btn btn-sm btn-primary">✎</a>
-        <form action="{{ url_for('alumnos_delete', correo=a.correo) }}" method="post" class="d-inline" onsubmit="return confirm('Eliminar?');">
+        {% if session.user.rol in ['Administrador','Jefe','Profesor'] %}
+        <a href="{{ url_for('alumnos_edit', No_Control=a.No_Control) }}" class="btn btn-sm btn-warning">✎</a>
+        <form action="{{ url_for('alumnos_delete', No_Control=a.No_Control) }}" method="post" style="display:inline;">
           <button class="btn btn-sm btn-danger">🗑</button>
         </form>
+        {% else %}
+        <span class="text-muted">—</span>
+        {% endif %}
       </td>
     </tr>
     {% endfor %}

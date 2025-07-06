@@ -1,33 +1,39 @@
 {% extends "layout.html" %}
-{% block title %}Alumno{% endblock %}
-{% block content %}
-  {# Si no existe “alumno”, lo creamos vacío para que alumno.get(...) no falle #}
-  {% set alumno = alumno if alumno is defined else {} %}
+{% block title %}{{ alumno.No_Control and 'Editar' or 'Nuevo' }} Alumno{% endblock %}
 
-  <h3>{% if alumno.get('correo') %}Editar Alumno{% else %}Nuevo Alumno{% endif %}</h3>
-  <form method="post">
-    <div class="mb-3">
-      <label class="form-label">Correo</label>
-      <input type="email" name="correo" class="form-control"
-             value="{{ alumno.get('correo','') }}"
-             {% if alumno.get('correo') %}readonly{% endif %} required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input type="text" name="nombre" class="form-control"
-             value="{{ alumno.get('nombre','') }}" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Área</label>
-      <input type="text" name="area" class="form-control"
-             value="{{ alumno.get('area','') }}">
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Profesor</label>
-      <input type="email" name="profesor" class="form-control"
-             value="{{ alumno.get('profesor','') }}">
-    </div>
-    <button class="btn btn-primary">Guardar</button>
-    <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>
-  </form>
+{% block content %}
+<h3>{{ alumno.No_Control and 'Editar' or 'Nuevo' }} Alumno</h3>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">No. Control</label>
+    <input name="No_Control" class="form-control" value="{{ alumno.No_Control or '' }}"
+           {% if alumno.No_Control %}readonly{% endif %} required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input name="Nombre" class="form-control" value="{{ alumno.Nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Apellido Paterno</label>
+    <input name="Apellido_Paterno" class="form-control" value="{{ alumno.Apellido_Paterno or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Apellido Materno</label>
+    <input name="Apellido_Materno" class="form-control" value="{{ alumno.Apellido_Materno or '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Carrera</label>
+    <input name="Carrera" class="form-control" value="{{ alumno.Carrera or '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Área</label>
+    <input name="area" class="form-control" value="{{ alumno.area or '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Profesor (correo)</label>
+    <input name="profesor" class="form-control" value="{{ alumno.profesor or '' }}">
+  </div>
+  <button class="btn btn-primary">Guardar</button>
+  <a class="btn btn-secondary" href="{{ url_for('alumnos_list') }}">Cancelar</a>
+</form>
 {% endblock %}
