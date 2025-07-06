@@ -1,41 +1,21 @@
 {% extends "layout.html" %}
-{% block title %}Formulario de {{ tipo|capitalize }}{% endblock %}
+{% block title %}{{ valores[campos[0]] and 'Editar' or 'Nuevo' }} {{ tipo|capitalize }}{% endblock %}
 {% block content %}
-<h2>
-  {% if valores and valores.get(campos[0]) %}
-    Editar {{ tipo|capitalize }}
-  {% else %}
-    Nuevo {{ tipo|capitalize }}
-  {% endif %}
-</h2>
-<form method="POST">
+<h2>{{ valores[campos[0]] and 'Editar' or 'Nuevo' }} {{ tipo|capitalize }}</h2>
+
+<form method="post">
   <div class="row">
-    {% set tp_fields = campos|select("match","^TP_")|list %}
     {% for campo in campos %}
-      {% if campo in tp_fields %}
-        <!-- Radios para tipo de proyecto -->
-        <div class="col-12 mb-3">
-          <label class="form-label">Tipo de Proyecto:</label><br>
-          {% for tp in tp_fields %}
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="tipo_participacion" id="{{ tp }}" value="{{ tp }}"
-                   {% if valores.get(tp)=='X' %}checked{% endif %}>
-            <label class="form-check-label" for="{{ tp }}">
-              {{ tp.replace('TP_','')|replace('_',' ')|capitalize }}
-            </label>
-          </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ campo.replace('_',' ')|capitalize }}</label>
-          <input type="text" name="{{ campo }}" class="form-control"
-                 value="{{ valores.get(campo,'') }}">
-        </div>
-      {% endif %}
+      <div class="col-md-6 mb-3">
+        <label class="form-label">{{ campo|capitalize|replace('_',' ') }}</label>
+        <input type="text" name="{{ campo }}" class="form-control"
+               value="{{ valores.get(campo,'') }}"
+               {% if campo=='id' and valores.get(campo) %}readonly{% endif %}
+               {% if campo in ['correo','nombre'] and tipo=='usuarios' %}required{% endif %}>
+      </div>
     {% endfor %}
   </div>
-  <button type="submit" class="btn btn-primary">Guardar</button>
+  <button class="btn btn-primary">Guardar</button>
   <a href="{{ url_for('entidad_list', tipo=tipo) }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}

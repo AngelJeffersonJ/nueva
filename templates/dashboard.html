@@ -2,19 +2,8 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="text-center">
-  <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
-  <p>Rol: <strong>{{ usuario.rol }}</strong></p>
-  <div class="mt-4">
-    {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-      <a href="{{ url_for('entidad_list', tipo='alumnos') }}" class="btn btn-primary mx-1">Gestionar Alumnos</a>
-    {% endif %}
-    {% if usuario.rol in ['Administrador','Encargado'] %}
-      <a href="{{ url_for('entidad_list', tipo='areas') }}" class="btn btn-secondary mx-1">Gestionar Áreas</a>
-      <a href="{{ url_for('entidad_list', tipo='profesores') }}" class="btn btn-secondary mx-1">Gestionar Profesores</a>
-    {% endif %}
-    {% if usuario.rol == 'Administrador' %}
-      <a href="{{ url_for('entidad_list', tipo='usuarios') }}" class="btn btn-secondary mx-1">Gestionar Usuarios</a>
-    {% endif %}
-  </div>
+  <h2>Bienvenido</h2>
+  <p>Usuario: <strong>{{ session.user.correo }}</strong></p>
+  <p>Rol: <strong>{{ session.user.rol }}</strong></p>
 </div>
 {% endblock %}
