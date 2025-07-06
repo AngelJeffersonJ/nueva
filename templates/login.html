@@ -4,9 +4,10 @@
 <div class="row justify-content-center">
   <div class="col-md-4">
     <div class="card shadow">
-      <div class="card-body">
-        <h5 class="card-title">Acceso</h5>
-        <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Iniciar con cuenta institucional</a>
+      <div class="card-body text-center">
+        <h5 class="card-title mb-4">Acceso Institucional</h5>
+        <!-- Redirige al flujo de Azure AD -->
+        <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Ingresar con cuenta @aguascalientes.tecnm.mx</a>
       </div>
     </div>
   </div>
