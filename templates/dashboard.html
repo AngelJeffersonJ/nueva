@@ -2,26 +2,17 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="text-center">
-  <h2>Bienvenido</h2>
-  <p>Usuario: <strong>{{ usuario.correo }}</strong></p>
-  <p>Rol: <strong>{{ usuario.rol }}</strong></p>
-  <div class="mt-4">
-    {% if usuario.rol == 'Administrador' %}
-      <a href="{{ url_for('usuarios_list') }}" class="btn btn-outline-primary mx-2">Gestionar Usuarios</a>
+  <h2>Bienvenido, {{ usuario.name or usuario.correo }}</h2>
+  <div class="my-4">
+    {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
+      <a href="{{ url_for('entidad_list', tipo='alumnos') }}" class="btn btn-primary">Gestionar Alumnos</a>
     {% endif %}
     {% if usuario.rol in ['Administrador','Encargado'] %}
-      <a href="{{ url_for('areas_list') }}" class="btn btn-outline-primary mx-2">Gestionar Áreas</a>
-      <a href="{{ url_for('profesores_list') }}" class="btn btn-outline-primary mx-2">Gestionar Profesores</a>
+      <a href="{{ url_for('entidad_list', tipo='areas') }}" class="btn btn-secondary">Gestionar Áreas</a>
+      <a href="{{ url_for('entidad_list', tipo='profesores') }}" class="btn btn-secondary">Gestionar Profesores</a>
     {% endif %}
-    {% if usuario.rol in ['Administrador','Encargado','Maestro'] %}
-      <a href="{{ url_for('alumnos_list') }}" class="btn btn-outline-primary mx-2">Gestionar Alumnos</a>
-    {% endif %}
-    {% if usuario.rol == 'Alumno' %}
-      <a href="{{ url_for('generar_solicitud', no_control=usuario.correo.split('@')[0]) }}" class="btn btn-outline-success mx-2">Descargar Solicitud</a>
-      {% for b in [1,2,3] %}
-      <a href="{{ url_for('generar_bimestral', bimestre=b, no_control=usuario.correo.split('@')[0]) }}" class="btn btn-outline-success mx-2">Reporte Bimestre {{b}}</a>
-      {% endfor %}
-      <a href="{{ url_for('generar_final', no_control=usuario.correo.split('@')[0]) }}" class="btn btn-outline-success mx-2">Reporte Final</a>
+    {% if usuario.rol == 'Administrador' %}
+      <a href="{{ url_for('entidad_list', tipo='usuarios') }}" class="btn btn-secondary">Gestionar Usuarios</a>
     {% endif %}
   </div>
 </div>
