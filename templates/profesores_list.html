@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Profesores{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between mb-3">
   <h3>Profesores</h3>
   <a href="{{ url_for('profesores_new') }}" class="btn btn-success">Nuevo Profesor</a>
 </div>
@@ -10,13 +10,11 @@
   <tbody>
     {% for p in profesores %}
     <tr>
-      <td>{{ p.correo }}</td>
-      <td>{{ p.nombre }}</td>
-      <td>{{ p.area }}</td>
+      <td>{{ p.correo }}</td><td>{{ p.nombre }}</td><td>{{ p.area }}</td>
       <td>
-        <a class="btn btn-sm btn-primary" href="{{ url_for('profesores_edit', correo=p.correo) }}">Editar</a>
-        <form class="d-inline" method="post" action="{{ url_for('profesores_delete', correo=p.correo) }}">
-          <button class="btn btn-sm btn-danger">Eliminar</button>
+        <a href="{{ url_for('profesores_edit', correo=p.correo) }}" class="btn btn-sm btn-primary">✎</a>
+        <form action="{{ url_for('profesores_delete', correo=p.correo) }}" method="post" class="d-inline" onsubmit="return confirm('Eliminar?');">
+          <button class="btn btn-sm btn-danger">🗑</button>
         </form>
       </td>
     </tr>
