@@ -1,29 +1,33 @@
 {% extends "layout.html" %}
 {% block title %}Alumno{% endblock %}
 {% block content %}
-<h3>{% if alumno.get('correo') %}Editar Alumno{% else %}Nuevo Alumno{% endif %}</h3>
-<form method="post">
-  <div class="mb-3">
-    <label class="form-label">Correo</label>
-    <input type="email" name="correo" class="form-control"
-      value="{{ alumno.get('correo','') }}" {% if alumno.get('correo') %}readonly{% endif %} required>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Nombre</label>
-    <input type="text" name="nombre" class="form-control"
-      value="{{ alumno.get('nombre','') }}" required>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Área</label>
-    <input type="text" name="area" class="form-control"
-      value="{{ alumno.get('area','') }}">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Profesor</label>
-    <input type="email" name="profesor" class="form-control"
-      value="{{ alumno.get('profesor','') }}">
-  </div>
-  <button class="btn btn-primary">Guardar</button>
-  <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>
-</form>
+  {# Si no existe “alumno”, lo creamos vacío para que alumno.get(...) no falle #}
+  {% set alumno = alumno if alumno is defined else {} %}
+
+  <h3>{% if alumno.get('correo') %}Editar Alumno{% else %}Nuevo Alumno{% endif %}</h3>
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Correo</label>
+      <input type="email" name="correo" class="form-control"
+             value="{{ alumno.get('correo','') }}"
+             {% if alumno.get('correo') %}readonly{% endif %} required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nombre</label>
+      <input type="text" name="nombre" class="form-control"
+             value="{{ alumno.get('nombre','') }}" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Área</label>
+      <input type="text" name="area" class="form-control"
+             value="{{ alumno.get('area','') }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Profesor</label>
+      <input type="email" name="profesor" class="form-control"
+             value="{{ alumno.get('profesor','') }}">
+    </div>
+    <button class="btn btn-primary">Guardar</button>
+    <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>
+  </form>
 {% endblock %}
