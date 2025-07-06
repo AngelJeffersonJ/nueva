@@ -1,17 +1,19 @@
 {% extends "layout.html" %}
-{% block title %}{{ area and 'Editar' or 'Nueva' }} Área{% endblock %}
+{% block title %}Área{% endblock %}
 {% block content %}
-<h3>{{ area and 'Editar' or 'Nueva' }} Área</h3>
+<h3>{% if area.get('id') %}Editar Área{% else %}Nueva Área{% endif %}</h3>
 <form method="post">
   <div class="mb-3">
     <label class="form-label">Nombre</label>
-    <input name="nombre" class="form-control" value="{{ area.nombre or '' }}" required>
+    <input type="text" name="nombre" class="form-control"
+      value="{{ area.get('nombre','') }}" required>
   </div>
   <div class="mb-3">
     <label class="form-label">Encargado (correo)</label>
-    <input name="encargado" class="form-control" value="{{ area.encargado or '' }}">
+    <input type="email" name="encargado" class="form-control"
+      value="{{ area.get('encargado','') }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
-  <a class="btn btn-secondary" href="{{ url_for('areas_list') }}">Cancelar</a>
+  <a href="{{ url_for('areas_list') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
