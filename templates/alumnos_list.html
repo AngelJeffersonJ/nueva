@@ -1,39 +1,45 @@
 {% extends "layout.html" %}
-{% block title %}Alumnos{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
-  <h3>Alumnos</h3>
-  {% if session.user.rol in ['Administrador','Jefe','Profesor'] %}
-    <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
-  {% endif %}
-</div>
-<table class="table table-bordered table-hover">
-  <thead class="table-dark">
-    <tr>
-      <th>No. Control</th><th>Nombre</th><th>Carrera</th><th>Área</th><th>Profesor</th><th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for a in alumnos %}
-    <tr>
-      <td>{{ a.No_Control }}</td>
-      <td>{{ a.Nombre }} {{ a.Apellido_Paterno }} {{ a.Apellido_Materno }}</td>
-      <td>{{ a.Carrera }}</td>
-      <td>{{ a.area }}</td>
-      <td>{{ a.profesor }}</td>
-      <td>
-        {% if session.user.rol in ['Administrador','Jefe','Profesor'] %}
-        <a href="{{ url_for('alumnos_edit', No_Control=a.No_Control) }}" class="btn btn-sm btn-warning">✎</a>
-        <form action="{{ url_for('alumnos_delete', No_Control=a.No_Control) }}" method="post" style="display:inline;">
-          <button class="btn btn-sm btn-danger">🗑</button>
-        </form>
-        {% else %}
-        <span class="text-muted">—</span>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
+<h2>Lista de Alumnos</h2>
+
+{% if session['role'] == 'Administrador' %}
+    <a href="{{ url_for('alumnos_new') }}" class="btn btn-primary mb-3">+ Nuevo Alumno</a>
+{% endif %}
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>No. Control</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Carrera</th>
+            <th>Acciones</th>
+            <th>Generar Documentos</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in alumnos %}
+        <tr>
+            <td>{{ a['no_control'] }}</td>
+            <td>{{ a['nombre'] }}</td>
+            <td>{{ a['correo'] }}</td>
+            <td>{{ a['carrera'] }}</td>
+            <td>
+                {% if session['role'] == 'Administrador' %}
+                <a href="{{ url_for('alumnos_edit', no_control=a['no_control']) }}" class="btn btn-sm btn-warning">✎ Editar</a>
+                <a href="{{ url_for('alumnos_delete', no_control=a['no_control']) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este alumno?');">🗑 Eliminar</a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('generar_solicitud', no_control=a['no_control']) }}" class="btn btn-sm btn-success mb-1">📄 Solicitud</a>
+                <a href="{{ url_for('generar_bimestral', no_control=a['no_control'], numero=1) }}" class="btn btn-sm btn-info mb-1">📄 Bim 1</a>
+                <a href="{{ url_for('generar_bimestral', no_control=a['no_control'], numero=2) }}" class="btn btn-sm btn-info mb-1">📄 Bim 2</a>
+                <a href="{{ url_for('generar_bimestral', no_control=a['no_control'], numero=3) }}" class="btn btn-sm btn-info mb-1">📄 Bim 3</a>
+                <a href="{{ url_for('generar_final', no_control=a['no_control']) }}" class="btn btn-sm btn-secondary">📄 Final</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 {% endblock %}
