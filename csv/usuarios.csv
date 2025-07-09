@@ -1,5 +1,4 @@
-correo,rol,nombre
-21151027@aguascalientes.tecnm.mx,Administrador,Admin Principal
-jefearea@ejemplo.com,JefeDepartamento,Jefe de ́rea
-profesor1@ejemplo.com,Profesor,Profesor Uno
-alumno1@ejemplo.com,Alumno,Alumno Uno
+correo,rol,area
+alice@aguascalientes.tecnm.mx,Administrador,TI
+maria@aguascalientes.tecnm.mx,Encargado,Desarrollo
+jose@aguascalientes.tecnm.mx,Maestro,Electrónica

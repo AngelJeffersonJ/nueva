@@ -1,1 +1,4 @@
-Apellido_Paterno,Apellido_Materno,Nombre,Sexo,Telefono,Correo,Domicilio,No_Control,Carrera,Periodo,Semestre,Creditos
+No_Control,nombre,area,profesor
+20210001,Ana Márquez,TI,ricardo.martinez@aguascalientes.tecnm.mx
+20210002,Carlos Rivera,Desarrollo,juan.perez@aguascalientes.tecnm.mx
+20210003,María Fernández,Electrónica,laura.gomez@aguascalientes.tecnm.mx

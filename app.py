@@ -49,7 +49,7 @@ DOC_FIELDS = [
     'TP_Edu_Adultos','TP_Desarrollo','TP_Deportivo','TP_Cultural','TP_Civico',
     'TP_Sustentable','TP_Salud','TP_Medio_Amb','TP_Otros',
     'Dia_Solicitud','Mes_Solicitud','Anio_Solicitud',
-    # Bimestrales
+    # Bimestrales (3 bimestres)
     'Dia1_1','Mes1_1','Anio1_1','Dia2_1','Mes2_1','Anio2_1',
     'Dia1_2','Mes1_2','Anio1_2','Dia2_2','Mes2_2','Anio2_2',
     'Dia1_3','Mes1_3','Anio1_3','Dia2_3','Mes2_3','Anio2_3',
@@ -168,7 +168,10 @@ def authorized():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(f"{AUTHORITY}/oauth2/v2.0/logout?post_logout_redirect_uri={url_for('login', _external=True)}")
+    return redirect(
+        f"{AUTHORITY}/oauth2/v2.0/logout?post_logout_redirect_uri="
+        f"{url_for('login', _external=True)}"
+    )
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 @app.route('/')
@@ -348,7 +351,7 @@ def alumnos_new():
 @app.route('/alumnos/edit/<No_Control>', methods=['GET','POST'])
 @roles_required('Administrador','Encargado','Maestro')
 def alumnos_edit(No_Control):
-    lst = cargar_csv(ALUMNOS_CSV)
+    lst  = cargar_csv(ALUMNOS_CSV)
     alum = next((a for a in lst if a.get('No_Control') == No_Control), None)
     if not alum:
         flash("Alumno no encontrado", 'danger')
