@@ -1,9 +1,24 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-  <div class="text-center">
-    <h2>Bienvenido</h2>
-    <p>Usuario: <strong>{{ session.user.correo }}</strong></p>
-    <p>Rol: <strong>{{ role }}</strong></p>
+<div class="text-center">
+  <h1 class="mb-4">Panel de Control</h1>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="list-group">
+        {% if session.role == 'Administrador' %}
+          <a href="{{ url_for('usuarios_list') }}" class="list-group-item list-group-item-action">Gestión de Usuarios</a>
+        {% endif %}
+        {% if session.role in ['Administrador','Encargado'] %}
+          <a href="{{ url_for('areas_list') }}" class="list-group-item list-group-item-action">Gestión de Áreas</a>
+          <a href="{{ url_for('profesores_list') }}" class="list-group-item list-group-item-action">Gestión de Profesores</a>
+        {% endif %}
+        {% if session.role in ['Administrador','Encargado','Maestro'] %}
+          <a href="{{ url_for('alumnos_list') }}" class="list-group-item list-group-item-action">Gestión de Alumnos</a>
+        {% endif %}
+        <a href="{{ url_for('documentos_list') }}" class="list-group-item list-group-item-action">Gestión de Documentos</a>
+      </div>
+    </div>
   </div>
+</div>
 {% endblock %}

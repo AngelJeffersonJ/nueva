@@ -1,7 +1,7 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}{{ profesor.correo and 'Editar' or 'Nuevo' }} Profesor{% endblock %}
 {% block content %}
-<h3>{{ profesor.correo and 'Editar' or 'Nuevo' }} Profesor</h3>
+<h2>{{ profesor.correo and 'Editar' or 'Nuevo' }} Profesor</h2>
 <form method="post">
   <div class="mb-3">
     <label class="form-label">Correo</label>
@@ -16,9 +16,10 @@
   </div>
   <div class="mb-3">
     <label class="form-label">Área</label>
-    <input type="text" name="area" class="form-control" value="{{ profesor.area or '' }}">
+    <input type="text" name="area" class="form-control"
+           value="{{ profesor.area or '' }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
-  <a class="btn btn-secondary" href="{{ url_for('profesores_list') }}">Cancelar</a>
+  <a href="{{ url_for('profesores_list') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}

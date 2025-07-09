@@ -3,7 +3,7 @@
 {% block content %}
 <div class="text-center">
   <h1 class="display-4">404</h1>
-  <p>Página no encontrada.</p>
-  <a href="/" class="btn btn-secondary">Inicio</a>
+  <p>La página solicitada no existe.</p>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Volver al Dashboard</a>
 </div>
 {% endblock %}

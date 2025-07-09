@@ -1,24 +1,37 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}Documentos{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-2">
-  <h3>Metadatos de Documentos</h3>
+<div class="d-flex justify-content-between mb-3">
+  <h2>Documentos</h2>
   <a href="{{ url_for('documentos_new') }}" class="btn btn-success">Nuevo Documento</a>
 </div>
-<table class="table table-striped">
-  <thead>
+<table class="table table-bordered table-sm">
+  <thead class="table-dark">
     <tr>
-      {% for f in documentos[0].keys() %}<th>{{ f|capitalize }}</th>{% endfor %}
-      <th>Acciones</th>
+      <th>No. Control</th><th>Nombre</th><th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for d in documentos %}
     <tr>
-      {% for f in documentos[0].keys() %}<td>{{ d[f] }}</td>{% endfor %}
+      <td>{{ d.No_Control }}</td>
+      <td>{{ d.Nombre }} {{ d.Apellido_Paterno }} {{ d.Apellido_Materno }}</td>
       <td>
-        <a href="{{ url_for('documentos_edit', no_control=d.no_control) }}" class="btn btn-sm btn-primary">Editar</a>
-        <a href="{{ url_for('documentos_delete', no_control=d.no_control) }}" class="btn btn-sm btn-danger">Eliminar</a>
+        <a href="{{ url_for('documentos_edit', No_Control=d.No_Control) }}" class="btn btn-sm btn-warning">Editar</a>
+        <a href="{{ url_for('documentos_delete', No_Control=d.No_Control) }}" class="btn btn-sm btn-danger"
+           onclick="return confirm('¿Eliminar documento?');">Eliminar</a>
+        <div class="btn-group">
+          <a href="{{ url_for('generar_solicitud', No_Control=d.No_Control) }}" class="btn btn-sm btn-primary">Solicitud</a>
+          <button type="button" class="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+            <span class="visually-hidden">Bimestrales</span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ url_for('generar_bimestral', No_Control=d.No_Control, num=1) }}">Bimestre 1</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('generar_bimestral', No_Control=d.No_Control, num=2) }}">Bimestre 2</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('generar_bimestral', No_Control=d.No_Control, num=3) }}">Bimestre 3</a></li>
+          </ul>
+          <a href="{{ url_for('generar_final', No_Control=d.No_Control) }}" class="btn btn-sm btn-success">Final</a>
+        </div>
       </td>
     </tr>
     {% endfor %}

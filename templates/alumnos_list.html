@@ -1,34 +1,25 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}Alumnos{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-2">
-  <h3>Alumnos</h3>
+<div class="d-flex justify-content-between mb-3">
+  <h2>Alumnos</h2>
   <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
 </div>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>No. Control</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th><th>Documentos</th>
-    </tr>
+<table class="table table-bordered">
+  <thead class="table-dark">
+    <tr><th>No. Control</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th></tr>
   </thead>
   <tbody>
     {% for a in alumnos %}
     <tr>
-      <td>{{ a.no_control }}</td>
+      <td>{{ a.No_Control }}</td>
       <td>{{ a.nombre }}</td>
       <td>{{ a.area }}</td>
       <td>{{ a.profesor }}</td>
       <td>
-        <a href="{{ url_for('alumnos_edit', no_control=a.no_control) }}" class="btn btn-sm btn-primary">Editar</a>
-        <a href="{{ url_for('alumnos_delete', no_control=a.no_control) }}" class="btn btn-sm btn-danger">Eliminar</a>
-      </td>
-      <td>
-        <a href="{{ url_for('generar_solicitud', no_control=a.no_control) }}" class="btn btn-sm btn-info">Solicitud</a>
-        {% for i in [1,2,3] %}
-        <a href="{{ url_for('generar_bimestral', no_control=a.no_control, n=i) }}"
-           class="btn btn-sm btn-secondary">Bim{{i}}</a>
-        {% endfor %}
-        <a href="{{ url_for('generar_final', no_control=a.no_control) }}" class="btn btn-sm btn-success">Final</a>
+        <a href="{{ url_for('alumnos_edit', No_Control=a.No_Control) }}" class="btn btn-sm btn-warning">Editar</a>
+        <a href="{{ url_for('alumnos_delete', No_Control=a.No_Control) }}" class="btn btn-sm btn-danger"
+           onclick="return confirm('¿Eliminar alumno?');">Eliminar</a>
       </td>
     </tr>
     {% endfor %}

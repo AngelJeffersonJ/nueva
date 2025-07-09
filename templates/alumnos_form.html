@@ -1,27 +1,26 @@
 {% extends "layout.html" %}
-{% block title %}Alumno{% endblock %}
+{% block title %}{{ alumno.No_Control and 'Editar' or 'Nuevo' }} Alumno{% endblock %}
 {% block content %}
-<h3>{% if alumno.no_control %}Editar Alumno{% else %}Nuevo Alumno{% endif %}</h3>
+<h2>{{ alumno.No_Control and 'Editar' or 'Nuevo' }} Alumno</h2>
 <form method="post">
   <div class="mb-3">
     <label class="form-label">No. de Control</label>
-    <input type="text" name="no_control" class="form-control"
-      value="{{ alumno.no_control or '' }}" {% if alumno.no_control %}readonly{% endif %} required>
+    <input type="text" name="No_Control" class="form-control"
+           value="{{ alumno.No_Control or '' }}"
+           {% if alumno.No_Control %}readonly{% endif %} required>
   </div>
   <div class="mb-3">
     <label class="form-label">Nombre</label>
     <input type="text" name="nombre" class="form-control"
-      value="{{ alumno.nombre     or '' }}" required>
+           value="{{ alumno.nombre or '' }}" required>
   </div>
   <div class="mb-3">
     <label class="form-label">Área</label>
-    <input type="text" name="area" class="form-control"
-      value="{{ alumno.area       or '' }}">
+    <input type="text" name="area" class="form-control" value="{{ alumno.area or '' }}">
   </div>
   <div class="mb-3">
     <label class="form-label">Profesor (correo)</label>
-    <input type="email" name="profesor" class="form-control"
-      value="{{ alumno.profesor   or '' }}">
+    <input type="email" name="profesor" class="form-control" value="{{ alumno.profesor or '' }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
   <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>

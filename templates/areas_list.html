@@ -1,21 +1,23 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}Áreas{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-2">
-  <h3>Áreas</h3>
+<div class="d-flex justify-content-between mb-3">
+  <h2>Áreas</h2>
   <a href="{{ url_for('areas_new') }}" class="btn btn-success">Nueva Área</a>
 </div>
-<table class="table table-striped">
-  <thead><tr><th>ID</th><th>Nombre</th><th>Encargado</th><th>Acciones</th></tr></thead>
+<table class="table table-bordered">
+  <thead class="table-dark">
+    <tr><th>Nombre</th><th>Encargado</th><th>Acciones</th></tr>
+  </thead>
   <tbody>
     {% for a in areas %}
     <tr>
-      <td>{{ a.id }}</td>
       <td>{{ a.nombre }}</td>
       <td>{{ a.encargado }}</td>
       <td>
-        <a href="{{ url_for('areas_edit', id=a.id) }}" class="btn btn-sm btn-primary">Editar</a>
-        <a href="{{ url_for('areas_delete', id=a.id) }}" class="btn btn-sm btn-danger">Eliminar</a>
+        <a href="{{ url_for('areas_edit', id=a.id) }}" class="btn btn-sm btn-warning">Editar</a>
+        <a href="{{ url_for('areas_delete', id=a.id) }}" class="btn btn-sm btn-danger"
+           onclick="return confirm('¿Eliminar área?');">Eliminar</a>
       </td>
     </tr>
     {% endfor %}

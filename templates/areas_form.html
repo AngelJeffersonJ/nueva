@@ -1,7 +1,7 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block title %}{{ area.id and 'Editar' or 'Nueva' }} Área{% endblock %}
 {% block content %}
-<h3>{{ area.id and 'Editar' or 'Nueva' }} Área</h3>
+<h2>{{ area.id and 'Editar' or 'Nueva' }} Área</h2>
 <form method="post">
   <div class="mb-3">
     <label class="form-label">Nombre</label>
@@ -12,6 +12,6 @@
     <input name="encargado" class="form-control" value="{{ area.encargado or '' }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
-  <a class="btn btn-secondary" href="{{ url_for('areas_list') }}">Cancelar</a>
+  <a href="{{ url_for('areas_list') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
