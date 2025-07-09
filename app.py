@@ -390,7 +390,7 @@ def alumnos_delete(No_Control):
     return redirect(url_for('alumnos_list'))
 
 
-# ── CRUD Documentos: lista y eliminación ──────────────────────────────────────
+# ── CRUD Documentos: lista, nueva y eliminación ───────────────────────────────
 @app.route('/documentos')
 @login_required
 def documentos_list():
@@ -400,11 +400,17 @@ def documentos_list():
         alumnos=cargar_csv(ALUMNOS_CSV)
     )
 
+# Stub para que exista la ruta /documentos/new usada en la plantilla
+@app.route('/documentos/new')
+@login_required
+def documentos_new():
+    flash("Seleccione en la tabla el tipo de documento que desea crear para cada alumno.", "info")
+    return redirect(url_for('documentos_list'))
+
 @app.route('/documentos/delete/<no_control>')
 @login_required
 def documentos_delete(no_control):
-    docs = [d for d in cargar_csv(DOCUMENTOS_CSV)
-            if d['No_Control']!=no_control]
+    docs = [d for d in cargar_csv(DOCUMENTOS_CSV) if d['No_Control'] != no_control]
     guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
     return redirect(url_for('documentos_list'))
 
