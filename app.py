@@ -371,47 +371,58 @@ def documentos_delete(No_Control):
 
 # ─── Generación de DOCX ──────────────────────────────────────────────────────
 
-@app.route('/generar_solicitud/<no_control>')
+@app.route('/generar_solicitud/<No_Control>')
 @login_required
-def generar_solicitud(no_control):
+def generar_solicitud(No_Control):
+    # Uso No_Control para filtrar, que internamente es 'no_control' en el CSV
     alumno  = next((a for a in cargar_csv(ALUMNOS_CSV)
-                    if a['no_control']==no_control), {})
+                    if a['no_control']==No_Control), {})
     docinfo = next((d for d in cargar_csv(DOCUMENTOS_CSV)
-                    if d['no_control']==no_control), {})
+                    if d['no_control']==No_Control), {})
     ctx = {**alumno, **docinfo}
-    doc = DocxTemplate(TEMPLATE_SOLI); buf=BytesIO()
-    doc.render(ctx); doc.save(buf); buf.seek(0)
+    doc = DocxTemplate(TEMPLATE_SOLI)
+    buf = BytesIO()
+    doc.render(ctx)
+    doc.save(buf)
+    buf.seek(0)
     return send_file(buf,
-                     download_name=f"Solicitud_{no_control}.docx",
+                     download_name=f"Solicitud_{No_Control}.docx",
                      as_attachment=True)
 
-@app.route('/generar_bimestral/<no_control>/<int:num>')
+@app.route('/generar_bimestral/<No_Control>/<int:num>')
 @login_required
-def generar_bimestral(no_control,num):
+def generar_bimestral(No_Control, num):
     alumno  = next((a for a in cargar_csv(ALUMNOS_CSV)
-                    if a['no_control']==no_control), {})
+                    if a['no_control']==No_Control), {})
     docinfo = next((d for d in cargar_csv(DOCUMENTOS_CSV)
-                    if d['no_control']==no_control), {})
+                    if d['no_control']==No_Control), {})
     ctx = {**alumno, **docinfo, 'reporte_no': num}
-    doc = DocxTemplate(TEMPLATE_BIM); buf=BytesIO()
-    doc.render(ctx); doc.save(buf); buf.seek(0)
+    doc = DocxTemplate(TEMPLATE_BIM)
+    buf = BytesIO()
+    doc.render(ctx)
+    doc.save(buf)
+    buf.seek(0)
     return send_file(buf,
-                     download_name=f"Reporte_Bimestral_{no_control}_Bim{num}.docx",
+                     download_name=f"Reporte_Bimestral_{No_Control}_Bim{num}.docx",
                      as_attachment=True)
 
-@app.route('/generar_final/<no_control>')
+@app.route('/generar_final/<No_Control>')
 @login_required
-def generar_final(no_control):
+def generar_final(No_Control):
     alumno  = next((a for a in cargar_csv(ALUMNOS_CSV)
-                    if a['no_control']==no_control), {})
+                    if a['no_control']==No_Control), {})
     docinfo = next((d for d in cargar_csv(DOCUMENTOS_CSV)
-                    if d['no_control']==no_control), {})
+                    if d['no_control']==No_Control), {})
     ctx = {**alumno, **docinfo}
-    doc = DocxTemplate(TEMPLATE_FINAL); buf=BytesIO()
-    doc.render(ctx); doc.save(buf); buf.seek(0)
+    doc = DocxTemplate(TEMPLATE_FINAL)
+    buf = BytesIO()
+    doc.render(ctx)
+    doc.save(buf)
+    buf.seek(0)
     return send_file(buf,
-                     download_name=f"Reporte_Final_{no_control}.docx",
+                     download_name=f"Reporte_Final_{No_Control}.docx",
                      as_attachment=True)
+
 
 # ─── Error handler ────────────────────────────────────────────────────────────
 
