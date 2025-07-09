@@ -1,3 +1,3 @@
-No_Control,Apellido_Paterno,Apellido_Materno,Nombre,Sexo,Telefono,Correo,Domicilio,Carrera,Periodo,Semestre,Creditos,Dependencia,Domicilio_Dependencia,Titular_Dependencia,Cargo_Responsable,Responsable_Proyecto,Nombre_Programa,Modalidad_Externa,Modalidad_Interna,Fecha_Inicio,Fecha_Terminacion,Actividades,Dia_Solicitud,Mes_Solicitud,Anio_Solicitud
-A001,García,Morales,María,Femenino,4491234567,maria@dominio.com,"Av. Principal 123",Ingeniería,2025-1,5,20,Servicios de Salud,"Calle 1 No.2","Dr. Luis Pérez",Coordinador,"Ing. Ana Ruiz","Proyecto Salud",Sí,,2025-02-01,2025-06-30,"Atención a pacientes",15,Febrero,2025
-A002,Sánchez,López,Carlos,Masculino,4497654321,carlos@dominio.com,"Av. Secundaria 456",Administración,2025-1,3,18,Desarrollo Comunitario,"Calle 3 No.4","Lic. Rosa Díaz",Directora,"Lic. Mario Ruiz","Proyecto Comunidad",,Sí,2025-03-01,2025-07-31,"Organización de eventos",20,Marzo,2025
+no_control,actividad_1,actividad_2,actividad_3,observaciones
+A001,Revisión de código,Documentación de procesos,Pruebas unitarias,Todas completadas satisfactoriamente
+A002,Elaboración de reportes,Análisis de datos,Presentación de resultados,Buen desempeño en todas las áreas

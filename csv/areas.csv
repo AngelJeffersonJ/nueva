@@ -1,3 +1,3 @@
-id,nombre,encargado
-area-1,Gestión Tecnológica,jefe@aguascalientes.tecnm.mx
-area-2,Planeación,yotro@aguascalientes.tecnm.mx
+id_area,nombre,jefe_departamento
+1,Ingeniería,jefearea@ejemplo.com
+2,Administración,jefearea@ejemplo.com

@@ -1,3 +1,3 @@
-no_control,nombre,area,profesor
-A001,María García,Gestión Tecnológica,profesor1@aguascalientes.tecnm.mx
-A002,Carlos Sánchez,Planeación,profesor2@aguascalientes.tecnm.mx
+no_control,nombre,correo,carrera,area,profesor
+A001,Juan Pérez,alumno1@ejemplo.com,Ingeniería en Sistemas,Ingeniería,profesor1@ejemplo.com
+A002,Ana García,alumno2@ejemplo.com,Administración de Empresas,Administración,profesor2@ejemplo.com
