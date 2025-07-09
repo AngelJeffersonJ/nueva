@@ -8,7 +8,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>No. Control</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th>
+      <th>No. Control</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th><th>Documentos</th>
     </tr>
   </thead>
   <tbody>
@@ -21,6 +21,28 @@
       <td>
         <a class="btn btn-sm btn-primary" href="{{ url_for('alumnos_edit',   no_control=a.no_control) }}">Editar</a>
         <a class="btn btn-sm btn-danger"  href="{{ url_for('alumnos_delete', no_control=a.no_control) }}">Eliminar</a>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-secondary" 
+           href="{{ url_for('generar_solicitud', no_control=a.no_control) }}">
+          Solicitud
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" 
+           href="{{ url_for('generar_bimestral', no_control=a.no_control, numero=1) }}">
+          Bim 1
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" 
+           href="{{ url_for('generar_bimestral', no_control=a.no_control, numero=2) }}">
+          Bim 2
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" 
+           href="{{ url_for('generar_bimestral', no_control=a.no_control, numero=3) }}">
+          Bim 3
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" 
+           href="{{ url_for('generar_final', no_control=a.no_control) }}">
+          Final
+        </a>
       </td>
     </tr>
     {% endfor %}
