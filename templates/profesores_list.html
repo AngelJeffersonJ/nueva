@@ -1,14 +1,12 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 {% block title %}Profesores{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
+<div class="d-flex justify-content-between mb-2">
   <h3>Profesores</h3>
   <a href="{{ url_for('profesores_new') }}" class="btn btn-success">Nuevo Profesor</a>
 </div>
 <table class="table table-striped">
-  <thead>
-    <tr><th>Correo</th><th>Nombre</th><th>Área</th><th>Acciones</th></tr>
-  </thead>
+  <thead><tr><th>Correo</th><th>Nombre</th><th>Área</th><th>Acciones</th></tr></thead>
   <tbody>
     {% for p in profesores %}
     <tr>
@@ -16,8 +14,8 @@
       <td>{{ p.nombre }}</td>
       <td>{{ p.area }}</td>
       <td>
-        <a class="btn btn-sm btn-primary" href="{{ url_for('profesores_edit', correo=p.correo) }}">Editar</a>
-        <a class="btn btn-sm btn-danger"  href="{{ url_for('profesores_delete', correo=p.correo) }}">Eliminar</a>
+        <a href="{{ url_for('profesores_edit', correo=p.correo) }}" class="btn btn-sm btn-primary">Editar</a>
+        <a href="{{ url_for('profesores_delete', correo=p.correo) }}" class="btn btn-sm btn-danger">Eliminar</a>
       </td>
     </tr>
     {% endfor %}

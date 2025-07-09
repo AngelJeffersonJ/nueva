@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block title %}Documentos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-2">
+  <h3>Metadatos de Documentos</h3>
+  <a href="{{ url_for('documentos_new') }}" class="btn btn-success">Nuevo Documento</a>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      {% for f in documentos[0].keys() %}<th>{{ f|capitalize }}</th>{% endfor %}
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in documentos %}
+    <tr>
+      {% for f in documentos[0].keys() %}<td>{{ d[f] }}</td>{% endfor %}
+      <td>
+        <a href="{{ url_for('documentos_edit', no_control=d.no_control) }}" class="btn btn-sm btn-primary">Editar</a>
+        <a href="{{ url_for('documentos_delete', no_control=d.no_control) }}" class="btn btn-sm btn-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

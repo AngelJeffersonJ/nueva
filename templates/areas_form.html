@@ -1,7 +1,7 @@
-{% extends "layout.html" %}
-{% block title %}Área{% endblock %}
+{% extends 'layout.html' %}
+{% block title %}{{ area.id and 'Editar' or 'Nueva' }} Área{% endblock %}
 {% block content %}
-<h3>{% if area.id %}Editar{% else %}Nueva{% endif %} Área</h3>
+<h3>{{ area.id and 'Editar' or 'Nueva' }} Área</h3>
 <form method="post">
   <div class="mb-3">
     <label class="form-label">Nombre</label>

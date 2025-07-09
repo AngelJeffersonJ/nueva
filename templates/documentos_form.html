@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block title %}{{ documento.no_control and 'Editar' or 'Nuevo' }} Documento{% endblock %}
+{% block content %}
+<h3>{{ documento.no_control and 'Editar' or 'Nuevo' }} Documento</h3>
+<form method="post">
+  {% for f in fields %}
+  <div class="mb-3">
+    <label class="form-label">{{ f|capitalize }}</label>
+    <input name="{{ f }}" class="form-control" value="{{ documento[f] or '' }}">
+  </div>
+  {% endfor %}
+  <button class="btn btn-primary">Guardar</button>
+  <a class="btn btn-secondary" href="{{ url_for('documentos_list') }}">Cancelar</a>
+</form>
+{% endblock %}

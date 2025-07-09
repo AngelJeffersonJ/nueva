@@ -1,9 +1,9 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="text-center">
-  <h2>Bienvenido</h2>
-  <p>Usuario: <strong>{{ user.correo }}</strong></p>
-  <p>Rol: <strong>{{ role }}</strong></p>
-</div>
+  <div class="text-center">
+    <h2>Bienvenido</h2>
+    <p>Usuario: <strong>{{ session.user.correo }}</strong></p>
+    <p>Rol: <strong>{{ role }}</strong></p>
+  </div>
 {% endblock %}

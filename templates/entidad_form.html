@@ -1,18 +1,28 @@
-{% extends "layout.html" %}
-{% block title %}{{ area.id and 'Editar' or 'Nueva' }} Área{% endblock %}
-
+{% extends 'layout.html' %}
+{% block title %}{{ alumno.no_control and 'Editar' or 'Nuevo' }} Alumno{% endblock %}
 {% block content %}
-<h3>{{ area.id and 'Editar' or 'Nueva' }} Área</h3>
+<h3>{{ alumno.no_control and 'Editar' or 'Nuevo' }} Alumno</h3>
 <form method="post">
   <div class="mb-3">
-    <label class="form-label">Nombre</label>
-    <input name="nombre" class="form-control" value="{{ area.nombre or '' }}" required>
+    <label class="form-label">No. Control</label>
+    <input name="no_control" class="form-control"
+           value="{{ alumno.no_control or '' }}"
+           {% if alumno.no_control %}readonly{% endif %} required>
   </div>
   <div class="mb-3">
-    <label class="form-label">Encargado (correo)</label>
-    <input name="encargado" class="form-control" value="{{ area.encargado or '' }}">
+    <label class="form-label">Nombre</label>
+    <input name="nombre" class="form-control"
+           value="{{ alumno.nombre or '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Área</label>
+    <input name="area" class="form-control" value="{{ alumno.area or '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Profesor (correo)</label>
+    <input name="profesor" class="form-control" value="{{ alumno.profesor or '' }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
-  <a class="btn btn-secondary" href="{{ url_for('areas_list') }}">Cancelar</a>
+  <a class="btn btn-secondary" href="{{ url_for('alumnos_list') }}">Cancelar</a>
 </form>
 {% endblock %}
