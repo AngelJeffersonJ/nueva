@@ -15,7 +15,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET', 'supersecret')
 
-# Configuración Azure AD
+# ── Configuración Azure AD ─────────────────────────────────────────────────────
 CLIENT_ID     = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 TENANT_ID     = os.getenv('TENANT_ID')
@@ -23,7 +23,7 @@ AUTHORITY     = f"https://login.microsoftonline.com/{TENANT_ID}"
 REDIRECT_URI  = os.getenv('REDIRECT_URI')
 SCOPE         = ['User.Read']
 
-# Rutas de CSV
+# ── Rutas de CSV ────────────────────────────────────────────────────────────────
 CSV_DIR        = os.path.join(app.root_path, 'csv')
 USERS_CSV      = os.path.join(CSV_DIR, 'usuarios.csv')
 AREAS_CSV      = os.path.join(CSV_DIR, 'areas.csv')
@@ -31,13 +31,13 @@ PROFESORES_CSV = os.path.join(CSV_DIR, 'profesores.csv')
 ALUMNOS_CSV    = os.path.join(CSV_DIR, 'alumnos_completo.csv')
 DOCUMENTOS_CSV = os.path.join(CSV_DIR, 'documentos_completo.csv')
 
-# Plantillas DOCX
-TPL_DIR       = os.path.join(app.root_path, 'plantillas')
-TPL_SOLICITUD = os.path.join(TPL_DIR, 'plantilla_solicitud_completa.docx')
-TPL_BIMESTRAL = os.path.join(TPL_DIR, 'Reporte_Bimestral_Plantilla.docx')
-TPL_FINAL     = os.path.join(TPL_DIR, 'plantilla_reporte_final.docx')
+# ── Plantillas DOCX ────────────────────────────────────────────────────────────
+TPL_DIR        = os.path.join(app.root_path, 'plantillas')
+TPL_SOLICITUD  = os.path.join(TPL_DIR, 'plantilla_solicitud_completa.docx')
+TPL_BIMESTRAL  = os.path.join(TPL_DIR, 'Reporte_Bimestral_Plantilla.docx')
+TPL_FINAL      = os.path.join(TPL_DIR, 'plantilla_reporte_final.docx')
 
-# Campos para documentos.csv
+# ── Campos para documentos.csv ─────────────────────────────────────────────────
 DOC_FIELDS = [
     'No_Control',
     # Solicitud
@@ -73,7 +73,7 @@ DOC_FIELDS = [
     'Nombre_Responsable','Cargo_Responsable'
 ]
 
-# Helpers
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def cargar_csv(path):
     try:
         if not os.path.isfile(path):
@@ -135,7 +135,7 @@ def _render_docx(template_path, context, filename):
         flash("Error generando el documento", 'danger')
         return redirect(url_for('dashboard'))
 
-# Autenticación
+# ── Autenticación ─────────────────────────────────────────────────────────────
 @app.route('/login')
 def login():
     msal_app = msal.ConfidentialClientApplication(
@@ -170,14 +170,14 @@ def logout():
     session.clear()
     return redirect(f"{AUTHORITY}/oauth2/v2.0/logout?post_logout_redirect_uri={url_for('login', _external=True)}")
 
-# Dashboard
+# ── Dashboard ─────────────────────────────────────────────────────────────────
 @app.route('/')
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html')
 
-# CRUD Usuarios
+# ── CRUD Usuarios ─────────────────────────────────────────────────────────────
 @app.route('/usuarios')
 @roles_required('Administrador')
 def usuarios_list():
@@ -223,7 +223,7 @@ def usuarios_delete(correo):
     guardar_csv(USERS_CSV, usuarios, ['correo','rol','area'])
     return redirect(url_for('usuarios_list'))
 
-# CRUD Áreas
+# ── CRUD Áreas ───────────────────────────────────────────────────────────────
 @app.route('/areas')
 @roles_required('Administrador','Encargado')
 def areas_list():
@@ -269,7 +269,7 @@ def areas_delete(id):
     guardar_csv(AREAS_CSV, areas, ['id','nombre','encargado'])
     return redirect(url_for('areas_list'))
 
-# CRUD Profesores
+# ── CRUD Profesores ──────────────────────────────────────────────────────────
 @app.route('/profesores')
 @roles_required('Administrador','Encargado')
 def profesores_list():
@@ -315,7 +315,7 @@ def profesores_delete(correo):
     guardar_csv(PROFESORES_CSV, profs, ['correo','nombre','area'])
     return redirect(url_for('profesores_list'))
 
-# CRUD Alumnos
+# ── CRUD Alumnos ─────────────────────────────────────────────────────────────
 @app.route('/alumnos')
 @login_required
 def alumnos_list():
@@ -373,13 +373,16 @@ def alumnos_delete(No_Control):
     guardar_csv(ALUMNOS_CSV, lst, ['No_Control','nombre','area','profesor'])
     return redirect(url_for('alumnos_list'))
 
-# CRUD Documentos
+
+# ── CRUD Documentos ───────────────────────────────────────────────────────────
 @app.route('/documentos')
 @login_required
 def documentos_list():
-    return render_template('documentos_list.html',
-                           documentos=cargar_csv(DOCUMENTOS_CSV),
-                           alumnos=cargar_csv(ALUMNOS_CSV))
+    return render_template(
+        'documentos_list.html',
+        documentos=cargar_csv(DOCUMENTOS_CSV),
+        alumnos=cargar_csv(ALUMNOS_CSV)
+    )
 
 @app.route('/documentos/new', methods=['GET','POST'])
 @login_required
@@ -399,11 +402,11 @@ def documentos_new():
         return redirect(url_for('documentos_list'))
     return render_template('documentos_form.html', alumnos=alumnos, documento={})
 
-@app.route('/documentos/edit/<no_control>', methods=['GET','POST'])
+@app.route('/documentos/edit/<No_Control>', methods=['GET','POST'])
 @login_required
-def documentos_edit(no_control):
+def documentos_edit(No_Control):
     docs=cargar_csv(DOCUMENTOS_CSV)
-    doc=next((d for d in docs if d.get('No_Control')==no_control),None)
+    doc=next((d for d in docs if d.get('No_Control')==No_Control),None)
     if not doc:
         flash("Documento no encontrado", 'danger')
         return redirect(url_for('documentos_list'))
@@ -415,14 +418,14 @@ def documentos_edit(no_control):
         return redirect(url_for('documentos_list'))
     return render_template('documentos_form.html', alumnos=cargar_csv(ALUMNOS_CSV), documento=doc)
 
-@app.route('/documentos/delete/<no_control>')
+@app.route('/documentos/delete/<No_Control>')
 @login_required
-def documentos_delete(no_control):
-    docs=[d for d in cargar_csv(DOCUMENTOS_CSV) if d.get('No_Control')!=no_control]
+def documentos_delete(No_Control):
+    docs=[d for d in cargar_csv(DOCUMENTOS_CSV) if d.get('No_Control')!=No_Control]
     guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
     return redirect(url_for('documentos_list'))
 
-# Generación de DOCX
+# ── Generación de DOCX ───────────────────────────────────────────────────────
 @app.route('/generar_solicitud/<no_control>')
 @login_required
 def generar_solicitud(no_control):
@@ -448,7 +451,7 @@ def generar_bimestral(no_control, num):
         flash("Datos incompletos", 'warning')
         return redirect(url_for('dashboard'))
     ctx={**alum,**doci,'reporte_no':num}
-    return _render_docx(TPL_BIMESTRAL, ctx, f"Reporte_Bimestral_{no_control}_B{num}.docx")
+    return _render_docx(TPL_BIMESTRAL, ctx, f"Bimestral_{no_control}_B{num}.docx")
 
 @app.route('/generar_todos_bimestrales/<no_control>')
 @login_required
@@ -466,7 +469,7 @@ def generar_todos_bimestrales(no_control):
             doc=DocxTemplate(TPL_BIMESTRAL)
             doc.render(ctx)
             b=BytesIO(); doc.save(b); b.seek(0)
-            z.writestr(f"Reporte_Bimestral_{no_control}_B{num}.docx",b.read())
+            z.writestr(f"Bimestral_{no_control}_B{num}.docx",b.read())
     zip_buf.seek(0)
     return send_file(zip_buf, as_attachment=True,
                      download_name=f"Reportes_Bimestrales_{no_control}.zip",
@@ -482,12 +485,12 @@ def generar_final(no_control):
         flash("Datos incompletos", 'warning')
         return redirect(url_for('dashboard'))
     ctx={**alum,**doci}
-    return _render_docx(TPL_FINAL, ctx, f"Reporte_Final_{no_control}.docx")
+    return _render_docx(TPL_FINAL, ctx, f"Final_{no_control}.docx")
 
-# Error 404
+# ── Error 404 ─────────────────────────────────────────────────────────────────
 @app.errorhandler(404)
 def not_found(error):
     return render_template('404.html'), 404
 
-if __name__=='__main__':
+if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.getenv('PORT',5000)))
