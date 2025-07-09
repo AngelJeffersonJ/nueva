@@ -1,3 +1,1 @@
-no_control,nombre,correo,carrera,area,profesor
-A001,Juan Pérez,alumno1@ejemplo.com,Ingeniería en Sistemas,Ingeniería,profesor1@ejemplo.com
-A002,Ana García,alumno2@ejemplo.com,Administración de Empresas,Administración,profesor2@ejemplo.com
+no_control,nombre,area,profesor

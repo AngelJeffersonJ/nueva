@@ -1,3 +1,1 @@
-no_control,actividad_1,actividad_2,actividad_3,observaciones
-A001,Revisión de código,Documentación de procesos,Pruebas unitarias,Todas completadas satisfactoriamente
-A002,Elaboración de reportes,Análisis de datos,Presentación de resultados,Buen desempeño en todas las áreas
+no_control,apellido_paterno,apellido_materno,nombre,sexo,telefono,correo,domicilio,carrera,periodo,semestre,creditos,dependencia,domicilio_dependencia,titular_dependencia,cargo_responsable,responsable_proyecto,nombre_programa,modalidad_externa,modalidad_interna,fecha_inicio,fecha_terminacion,actividades,tp_edu_adultos,tp_desarrollo,tp_deportivo,tp_cultural,tp_civico,tp_sustentable,tp_salud,tp_medio_amb,tp_otros,dia_solicitud,mes_solicitud,anio_solicitud
