@@ -1,14 +1,18 @@
 {% extends "layout.html" %}
 {% block title %}Iniciar Sesión{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <div class="card shadow">
-      <div class="card-body text-center">
-        <h5 class="card-title">Accede con tu cuenta institucional</h5>
-        <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Iniciar con Azure AD</a>
-      </div>
+<div class="row justify-content-center"><div class="col-md-4">
+  <div class="card shadow">
+    <div class="card-body">
+      <h5 class="card-title">Acceso</h5>
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Correo</label>
+          <input name="correo" class="form-control" required>
+        </div>
+        <button class="btn btn-primary w-100">Entrar</button>
+      </form>
     </div>
   </div>
-</div>
+</div></div>
 {% endblock %}

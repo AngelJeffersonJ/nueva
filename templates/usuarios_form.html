@@ -1,27 +1,27 @@
 {% extends "layout.html" %}
-{% block title %}{{ usuario.correo and 'Editar' or 'Nuevo' }} Usuario{% endblock %}
-
+{% block title %}Usuario{% endblock %}
 {% block content %}
-<h3>{{ usuario.correo and 'Editar' or 'Nuevo' }} Usuario</h3>
+<h3>{% if usuario.correo %}Editar Usuario{% else %}Nuevo Usuario{% endif %}</h3>
 <form method="post">
   <div class="mb-3">
     <label class="form-label">Correo</label>
     <input type="email" name="correo" class="form-control"
-           value="{{ usuario.correo or '' }}" {% if usuario.correo %}readonly{% endif %} required>
+      value="{{ usuario.correo or '' }}" {% if usuario.correo %}readonly{% endif %} required>
   </div>
   <div class="mb-3">
     <label class="form-label">Rol</label>
-    <select name="rol" class="form-select">
-      {% for r in ['Administrador','Jefe','Profesor','Estudiante'] %}
-      <option value="{{ r }}" {% if usuario.rol==r %}selected{% endif %}>{{ r }}</option>
-      {% endfor %}
+    <select name="rol" class="form-control">
+      <option value="Administrador" {% if usuario.rol=='Administrador' %}selected{% endif %}>Administrador</option>
+      <option value="Encargado"     {% if usuario.rol=='Encargado'     %}selected{% endif %}>Encargado</option>
+      <option value="Maestro"       {% if usuario.rol=='Maestro'       %}selected{% endif %}>Maestro</option>
+      <option value="Alumno"        {% if usuario.rol=='Alumno'        %}selected{% endif %}>Alumno</option>
     </select>
   </div>
   <div class="mb-3">
     <label class="form-label">Área</label>
-    <input name="area" class="form-control" value="{{ usuario.area or '' }}">
+    <input type="text" name="area" class="form-control" value="{{ usuario.area or '' }}">
   </div>
   <button class="btn btn-primary">Guardar</button>
-  <a href="{{ url_for('usuarios_list') }}" class="btn btn-secondary">Cancelar</a>
+  <a class="btn btn-secondary" href="{{ url_for('usuarios_list') }}">Cancelar</a>
 </form>
 {% endblock %}

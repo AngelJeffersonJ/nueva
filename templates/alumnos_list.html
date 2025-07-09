@@ -1,44 +1,29 @@
 {% extends "layout.html" %}
+{% block title %}Alumnos{% endblock %}
 {% block content %}
-<h2>Lista de Alumnos</h2>
-
-{% if session['role'] == 'Administrador' %}
-    <a href="{{ url_for('alumnos_new') }}" class="btn btn-primary mb-3">+ Nuevo Alumno</a>
-{% endif %}
-
-<table class="table table-striped table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>No. Control</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Carrera</th>
-            <th>Acciones</th>
-            <th>Generar Documentos</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for a in alumnos %}
-        <tr>
-            <td>{{ a['no_control'] }}</td>
-            <td>{{ a['nombre'] }}</td>
-            <td>{{ a['correo'] }}</td>
-            <td>{{ a['carrera'] }}</td>
-            <td>
-                {% if session['role'] == 'Administrador' %}
-                <a href="{{ url_for('alumnos_edit', no_control=a['no_control']) }}" class="btn btn-sm btn-warning mb-1">✎ Editar</a>
-                <a href="{{ url_for('alumnos_delete', no_control=a['no_control']) }}" class="btn btn-sm btn-danger mb-1" onclick="return confirm('¿Eliminar alumno?');">🗑 Eliminar</a>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{{ url_for('generar_solicitud', no_control=a['no_control']) }}" class="btn btn-sm btn-success mb-1">📄 Solicitud</a>
-                <a href="{{ url_for('generar_bimestral', no_control=a['no_control'], numero=1) }}" class="btn btn-sm btn-info mb-1">📄 Bim 1</a>
-                <a href="{{ url_for('generar_bimestral', no_control=a['no_control'], numero=2) }}" class="btn btn-sm btn-info mb-1">📄 Bim 2</a>
-                <a href="{{ url_for('generar_bimestral', no_control=a['no_control'], numero=3) }}" class="btn btn-sm btn-info mb-1">📄 Bim 3</a>
-                <a href="{{ url_for('generar_final', no_control=a['no_control']) }}" class="btn btn-sm btn-secondary">📄 Final</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+<div class="d-flex justify-content-between mb-3">
+  <h3>Alumnos</h3>
+  <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>No. Control</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in alumnos %}
+    <tr>
+      <td>{{ a.no_control }}</td>
+      <td>{{ a.nombre     }}</td>
+      <td>{{ a.area       }}</td>
+      <td>{{ a.profesor   }}</td>
+      <td>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('alumnos_edit',   no_control=a.no_control) }}">Editar</a>
+        <a class="btn btn-sm btn-danger"  href="{{ url_for('alumnos_delete', no_control=a.no_control) }}">Eliminar</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 {% endblock %}

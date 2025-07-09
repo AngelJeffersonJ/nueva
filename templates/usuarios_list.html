@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block title %}Usuarios{% endblock %}
-
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
-  <h3>Usuarios</h3>
-  <a href="{{ url_for('usuarios_new') }}" class="btn btn-success">Nuevo Usuario</a>
+<div class="d-flex justify-content-between mb-2">
+  <h3>Usuarios (Asignar Roles)</h3>
+  <a class="btn btn-success" href="{{ url_for('usuarios_new') }}">Nuevo Usuario</a>
 </div>
-<table class="table table-bordered table-hover">
-  <thead class="table-dark">
+<table class="table table-striped">
+  <thead>
     <tr><th>Correo</th><th>Rol</th><th>Área</th><th>Acciones</th></tr>
   </thead>
   <tbody>
@@ -17,10 +16,8 @@
       <td>{{ u.rol }}</td>
       <td>{{ u.area }}</td>
       <td>
-        <a href="{{ url_for('usuarios_edit', correo=u.correo) }}" class="btn btn-sm btn-warning">✎</a>
-        <form action="{{ url_for('usuarios_delete', correo=u.correo) }}" method="post" style="display:inline;">
-          <button class="btn btn-sm btn-danger">🗑</button>
-        </form>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('usuarios_edit', correo=u.correo) }}">✎</a>
+        <a class="btn btn-sm btn-danger" href="{{ url_for('usuarios_delete', correo=u.correo) }}">🗑</a>
       </td>
     </tr>
     {% endfor %}

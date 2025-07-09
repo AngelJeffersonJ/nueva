@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block title %}Profesores{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between mb-3">
   <h3>Profesores</h3>
   <a href="{{ url_for('profesores_new') }}" class="btn btn-success">Nuevo Profesor</a>
 </div>
-<table class="table table-bordered table-hover">
-  <thead class="table-dark">
+<table class="table table-striped">
+  <thead>
     <tr><th>Correo</th><th>Nombre</th><th>Área</th><th>Acciones</th></tr>
   </thead>
   <tbody>
@@ -17,10 +16,8 @@
       <td>{{ p.nombre }}</td>
       <td>{{ p.area }}</td>
       <td>
-        <a href="{{ url_for('profesores_edit', correo=p.correo) }}" class="btn btn-sm btn-warning">✎</a>
-        <form action="{{ url_for('profesores_delete', correo=p.correo) }}" method="post" style="display:inline;">
-          <button class="btn btn-sm btn-danger">🗑</button>
-        </form>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('profesores_edit', correo=p.correo) }}">Editar</a>
+        <a class="btn btn-sm btn-danger"  href="{{ url_for('profesores_delete', correo=p.correo) }}">Eliminar</a>
       </td>
     </tr>
     {% endfor %}

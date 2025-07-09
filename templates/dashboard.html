@@ -1,17 +1,9 @@
 {% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
 {% block content %}
-<h1 class="mb-4">Bienvenido {{ session['user'] }}</h1>
-<p>Rol: <strong>{{ session['role'] }}</strong></p>
-
-<div class="row">
-    <div class="col-md-4">
-        <div class="card text-bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Alumnos</h5>
-                <p class="card-text">Gestiona la lista de alumnos y genera documentos.</p>
-                <a href="{{ url_for('alumnos_list') }}" class="btn btn-light">Ir a Alumnos</a>
-            </div>
-        </div>
-    </div>
+<div class="text-center">
+  <h2>Bienvenido</h2>
+  <p>Usuario: <strong>{{ user.correo }}</strong></p>
+  <p>Rol: <strong>{{ role }}</strong></p>
 </div>
 {% endblock %}
