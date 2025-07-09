@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block title %}Solicitud – {{ no_control }}{% endblock %}
+
+{% block content %}
+<h3>Datos de Solicitud ({{ no_control }})</h3>
+
+<form method="post">
+  <input type="hidden" name="No_Control" value="{{ no_control }}">
+
+  {# Campos de Solicitud según plantilla_solicitud_completa.docx #}
+  {% set sfields = [
+    'Apellido_Paterno','Apellido_Materno','Nombre','Sexo','Telefono','Correo','Domicilio',
+    'Carrera','Periodo','Semestre','Creditos',
+    'Dependencia','Domicilio_Dependencia','Titular_Dependencia','Cargo_Responsable',
+    'Responsable_Proyecto','Nombre_Programa','Modalidad_Externa','Modalidad_Interna',
+    'Fecha_Inicio','Fecha_Terminacion','Actividades',
+    'TP_Edu_Adultos','TP_Desarrollo','TP_Deportivo','TP_Cultural','TP_Civico',
+    'TP_Sustentable','TP_Salud','TP_Medio_Amb','TP_Otros'
+  ] %}
+  {% for field in sfields %}
+    <div class="mb-3">
+      <label for="{{ field }}" class="form-label">
+        {{ field.replace('_',' ') }}
+      </label>
+
+      {# checkbox para los TP_ #}
+      {% if field.startswith('TP_') %}
+        <div class="form-check">
+          <input type="checkbox"
+                 class="form-check-input"
+                 id="{{ field }}"
+                 name="{{ field }}"
+                 value="1"
+                 {% if documento.get(field)=='1' %}checked{% endif %}>
+          <label class="form-check-label" for="{{ field }}">
+            {{ field.replace('TP_','')|replace('_',' ') }}
+          </label>
+        </div>
+
+      {# date-picker para fechas #}
+      {% elif field in ['Fecha_Inicio','Fecha_Terminacion'] %}
+        <input type="date"
+               class="form-control"
+               id="{{ field }}"
+               name="{{ field }}"
+               value="{{ documento.get(field,'') }}">
+
+      {# select para Sexo #}
+      {% elif field=='Sexo' %}
+        <select class="form-select" id="Sexo" name="Sexo" required>
+          <option value="">-- Sexo --</option>
+          <option value="M" {% if documento.get('Sexo')=='M' %}selected{% endif %}>Masculino</option>
+          <option value="F" {% if documento.get('Sexo')=='F' %}selected{% endif %}>Femenino</option>
+        </select>
+
+      {# textarea para Actividades #}
+      {% elif field=='Actividades' %}
+        <textarea class="form-control"
+                  id="Actividades"
+                  name="Actividades"
+                  rows="3">{{ documento.get('Actividades','') }}</textarea>
+
+      {# inputs de texto para el resto #}
+      {% else %}
+        <input type="text"
+               class="form-control"
+               id="{{ field }}"
+               name="{{ field }}"
+               value="{{ documento.get(field,'') }}">
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="btn btn-primary">Guardar Solicitud</button>
+  <a href="{{ url_for('documentos_list') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

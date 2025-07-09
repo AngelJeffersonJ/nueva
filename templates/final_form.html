@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}Reporte Final – {{ no_control }}{% endblock %}
+
+{% block content %}
+<h3>Reporte Final ({{ no_control }})</h3>
+
+<form method="post">
+  <input type="hidden" name="No_Control" value="{{ no_control }}">
+
+  {# Municipio, Estado #}
+  <div class="row mb-3">
+    <div class="col">
+      <label class="form-label">Municipio</label>
+      <input type="text" class="form-control" name="Municipio" value="{{ documento.get('Municipio','') }}">
+    </div>
+    <div class="col">
+      <label class="form-label">Estado</label>
+      <input type="text" class="form-control" name="Estado" value="{{ documento.get('Estado','') }}">
+    </div>
+  </div>
+
+  {# Actividades y Logros #}
+  {% for i in range(1,9) %}
+  <div class="mb-3">
+    <label class="form-label">Actividad {{ i }}</label>
+    <input type="text" class="form-control"
+           name="Actividad{{ i }}"
+           value="{{ documento.get('Actividad'~i,'') }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Logro {{ i }}</label>
+    <input type="text" class="form-control"
+           name="Logro{{ i }}"
+           value="{{ documento.get('Logro'~i,'') }}">
+  </div>
+  {% endfor %}
+
+  {# Aprendizajes y Beneficios #}
+  {% for i in range(1,9) %}
+  <div class="row mb-3">
+    <div class="col">
+      <label class="form-label">Aprendizaje {{ i }}</label>
+      <input type="text" class="form-control"
+             name="Aprendizaje{{ i }}"
+             value="{{ documento.get('Aprendizaje'~i,'') }}">
+    </div>
+    <div class="col">
+      <label class="form-label">Beneficio {{ i }}</label>
+      <input type="text" class="form-control"
+             name="Beneficio{{ i }}"
+             value="{{ documento.get('Beneficio'~i,'') }}">
+    </div>
+  </div>
+  {% endfor %}
+
+  {# Responsable final #}
+  <div class="mb-3">
+    <label class="form-label">Nombre del Responsable</label>
+    <input type="text" class="form-control" name="Nombre_Responsable"
+           value="{{ documento.get('Nombre_Responsable','') }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Cargo del Responsable</label>
+    <input type="text" class="form-control" name="Cargo_Responsable"
+           value="{{ documento.get('Cargo_Responsable','') }}">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Guardar Reporte Final</button>
+  <a href="{{ url_for('documentos_list') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block title %}Bimestral {{ num }} – {{ no_control }}{% endblock %}
+
+{% block content %}
+<h3>Reporte Bimestral B{{ num }} ({{ no_control }})</h3>
+
+<form method="post">
+  <input type="hidden" name="No_Control" value="{{ no_control }}">
+
+  {# Fechas del bimestre #}
+  <div class="row mb-3">
+    <div class="col">
+      <label class="form-label">Inicio (D/M/A)</label>
+      <div class="d-flex">
+        <input type="number" name="Dia1_{{ num }}" class="form-control me-1" placeholder="DD" value="{{ documento.get('Dia1_'~num,'') }}">
+        <input type="number" name="Mes1_{{ num }}" class="form-control me-1" placeholder="MM" value="{{ documento.get('Mes1_'~num,'') }}">
+        <input type="number" name="Anio1_{{ num }}" class="form-control" placeholder="AAAA" value="{{ documento.get('Anio1_'~num,'') }}">
+      </div>
+    </div>
+    <div class="col">
+      <label class="form-label">Término (D/M/A)</label>
+      <div class="d-flex">
+        <input type="number" name="Dia2_{{ num }}" class="form-control me-1" placeholder="DD" value="{{ documento.get('Dia2_'~num,'') }}">
+        <input type="number" name="Mes2_{{ num }}" class="form-control me-1" placeholder="MM" value="{{ documento.get('Mes2_'~num,'') }}">
+        <input type="number" name="Anio2_{{ num }}" class="form-control" placeholder="AAAA" value="{{ documento.get('Anio2_'~num,'') }}">
+      </div>
+    </div>
+  </div>
+
+  {# Supervisor #}
+  <div class="mb-3">
+    <label class="form-label">Nombre del Supervisor</label>
+    <input type="text" class="form-control" name="Nombre_supervisor" value="{{ documento.get('Nombre_supervisor','') }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Puesto del Supervisor</label>
+    <input type="text" class="form-control" name="Puesto_supervisor" value="{{ documento.get('Puesto_supervisor','') }}">
+  </div>
+
+  {# Actividades #}
+  {% for i in range(1,9) %}
+  <div class="mb-3">
+    <label class="form-label">Actividad {{ i }}</label>
+    <input type="text" class="form-control"
+           name="Actividad_{{ i }}"
+           value="{{ documento.get('Actividad_'~i,'') }}">
+  </div>
+  {% endfor %}
+
+  {# Evaluaciones: respN_i y estuN_i para el bimestre (si aplica) #}
+  {# En esta plantilla de ejemplo aparecen campos resp3_i / estu3_i hasta resp17_i/estu17_i.
+     Si sólo quieres mostrar los de este bimestre, filtra aquí según ‘num’ #}
+  <h5 class="mt-4">Evaluaciones</h5>
+  {% for n in range(3, 18) %}
+    <h6>Ítem {{ n }}</h6>
+    <div class="row">
+      {% for i in range(5) %}
+      <div class="col-6 mb-2">
+        <label class="form-label">Resp{{ n }}_{{ i }}</label>
+        <input type="text" class="form-control"
+               name="resp{{ n }}_{{ i }}"
+               value="{{ documento.get('resp'~n~'_'~i,'') }}">
+      </div>
+      <div class="col-6 mb-2">
+        <label class="form-label">Estu{{ n }}_{{ i }}</label>
+        <input type="text" class="form-control"
+               name="estu{{ n }}_{{ i }}"
+               value="{{ documento.get('estu'~n~'_'~i,'') }}">
+      </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="btn btn-primary">Guardar Bimestral {{ num }}</button>
+  <a href="{{ url_for('documentos_list') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
