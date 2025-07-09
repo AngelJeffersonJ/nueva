@@ -9,13 +9,12 @@ from dotenv import load_dotenv
 import msal
 from docxtpl import DocxTemplate
 
-# Carga variables de entorno
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'supersecret')
 
-# Configuración de Azure AD
+# Azure AD configuration
 CLIENT_ID     = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 TENANT_ID     = os.getenv('TENANT_ID')
@@ -23,7 +22,7 @@ AUTHORITY     = f"https://login.microsoftonline.com/{TENANT_ID}"
 REDIRECT_URI  = os.getenv('REDIRECT_URI')
 SCOPE         = ['User.Read']
 
-# Rutas de los CSV (dentro de csv/)
+# CSV file paths (in a csv/ folder at project root)
 CSV_DIR        = os.path.join(app.root_path, 'csv')
 USERS_CSV      = os.path.join(CSV_DIR, 'usuarios.csv')
 AREAS_CSV      = os.path.join(CSV_DIR, 'areas.csv')
@@ -31,7 +30,7 @@ PROFESORES_CSV = os.path.join(CSV_DIR, 'profesores.csv')
 ALUMNOS_CSV    = os.path.join(CSV_DIR, 'alumnos.csv')
 DOCUMENTOS_CSV = os.path.join(CSV_DIR, 'documentos.csv')
 
-# Rutas de las plantillas .docx (dentro de plantillas/)
+# Docx templates (in a plantillas/ folder at project root)
 TPL_DIR        = os.path.join(app.root_path, 'plantillas')
 TEMPLATE_SOLI  = os.path.join(TPL_DIR, 'plantilla_solicitud_completa.docx')
 TEMPLATE_BIM   = os.path.join(TPL_DIR, 'Reporte_Bimestral_Plantilla.docx')
@@ -40,7 +39,7 @@ TEMPLATE_FINAL = os.path.join(TPL_DIR, 'Reporte_Final_Lleno.docx')
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
 def cargar_csv(path):
-    """Carga un CSV y devuelve lista de dicts con claves en minúscula."""
+    """Load a CSV into a list of dicts, normalizing all keys to lowercase."""
     if not os.path.exists(path):
         return []
     with open(path, newline='', encoding='utf-8') as f:
@@ -52,13 +51,27 @@ def cargar_csv(path):
         return rows
 
 def guardar_csv(path, rows, fieldnames):
-    """Guarda lista de dicts en un CSV con los fieldnames indicados."""
+    """Save list of lowercase-keyed dicts to CSV with the given fieldnames."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
             writer.writerow({k: row.get(k, '') for k in fieldnames})
+
+def normalize_context(row):
+    """
+    Given a dict with lowercase_underscore keys, return a new dict containing:
+    - the original keys,
+    - plus Pascal_Case keys for each (e.g. 'apellido_paterno' → 'Apellido_Paterno').
+    """
+    ctx = {}
+    for k, v in row.items():
+        ctx[k] = v
+        parts = k.split('_')
+        pascal = '_'.join(p.capitalize() for p in parts)
+        ctx[pascal] = v
+    return ctx
 
 def login_required(f):
     @wraps(f)
@@ -79,7 +92,7 @@ def roles_required(*roles):
         return wrapper
     return decorator
 
-# ── Autenticación ─────────────────────────────────────────────────────────────
+# ── Authentication ─────────────────────────────────────────────────────────────
 
 @app.route('/login')
 def login():
@@ -132,7 +145,7 @@ def logout():
 def dashboard():
     return render_template('dashboard.html', user=session['user'], role=session['role'])
 
-# ── CRUD Usuarios ────────────────────────────────────────────────────────────
+# ── Usuarios CRUD (Administrador) ─────────────────────────────────────────────
 
 @app.route('/usuarios')
 @roles_required('Administrador')
@@ -176,7 +189,7 @@ def usuarios_delete(correo):
     guardar_csv(USERS_CSV, usuarios, ['correo','rol','area'])
     return redirect(url_for('usuarios_list'))
 
-# ── CRUD Áreas ───────────────────────────────────────────────────────────────
+# ── Áreas CRUD (Administrador, Encargado) ────────────────────────────────────
 
 @app.route('/areas')
 @roles_required('Administrador','Encargado')
@@ -220,7 +233,7 @@ def areas_delete(id):
     guardar_csv(AREAS_CSV, areas, ['id','nombre','encargado'])
     return redirect(url_for('areas_list'))
 
-# ── CRUD Profesores ──────────────────────────────────────────────────────────
+# ── Profesores CRUD (Administrador, Encargado) ───────────────────────────────
 
 @app.route('/profesores')
 @roles_required('Administrador','Encargado')
@@ -264,14 +277,14 @@ def profesores_delete(correo):
     guardar_csv(PROFESORES_CSV, profs, ['correo','nombre','area'])
     return redirect(url_for('profesores_list'))
 
-# ── CRUD Alumnos ─────────────────────────────────────────────────────────────
+# ── Alumnos CRUD (Administrador, Encargado, Maestro) ────────────────────────
 
 @app.route('/alumnos')
 @login_required
 def alumnos_list():
     alumnos = cargar_csv(ALUMNOS_CSV)
-    role    = session['role']
-    user    = session['user']
+    role = session['role']
+    user = session['user']
     if role == 'Maestro':
         alumnos = [a for a in alumnos if a.get('profesor','').lower() == user['correo']]
     elif role == 'Encargado':
@@ -296,7 +309,7 @@ def alumnos_new():
 @app.route('/alumnos/edit/<no_control>', methods=['GET','POST'])
 @roles_required('Administrador','Encargado','Maestro')
 def alumnos_edit(no_control):
-    rows   = cargar_csv(ALUMNOS_CSV)
+    rows = cargar_csv(ALUMNOS_CSV)
     alumno = next((a for a in rows if a['no_control'] == no_control), None)
     if not alumno:
         flash('Alumno no encontrado','danger')
@@ -316,54 +329,67 @@ def alumnos_delete(no_control):
     guardar_csv(ALUMNOS_CSV, rows, ['no_control','nombre','area','profesor'])
     return redirect(url_for('alumnos_list'))
 
-# ── Generación de documentos ─────────────────────────────────────────────────
+# ── Document Generation ───────────────────────────────────────────────────────
 
 @app.route('/generar_solicitud/<no_control>')
 @login_required
 def generar_solicitud(no_control):
-    alumno  = next((a for a in cargar_csv(ALUMNOS_CSV)    if a['no_control'] == no_control), {})
-    docinfo = next((d for d in cargar_csv(DOCUMENTOS_CSV) if d['no_control'] == no_control), {})
-    context = {**alumno, **docinfo}
+    alumno_raw  = next((a for a in cargar_csv(ALUMNOS_CSV)    if a['no_control'] == no_control), {})
+    docinfo_raw = next((d for d in cargar_csv(DOCUMENTOS_CSV) if d['no_control'] == no_control), {})
+    context = {}
+    context.update(normalize_context(alumno_raw))
+    context.update(normalize_context(docinfo_raw))
     doc = DocxTemplate(TEMPLATE_SOLI)
     doc.render(context)
     buf = BytesIO()
     doc.save(buf)
     buf.seek(0)
-    return send_file(buf, download_name=f"Solicitud_{no_control}.docx", as_attachment=True)
+    return send_file(buf,
+                     download_name=f"Solicitud_{no_control}.docx",
+                     as_attachment=True)
 
 @app.route('/generar_bimestral/<no_control>/<int:numero>')
 @login_required
 def generar_bimestral(no_control, numero):
-    alumno  = next((a for a in cargar_csv(ALUMNOS_CSV)    if a['no_control'] == no_control), {})
-    docinfo = next((d for d in cargar_csv(DOCUMENTOS_CSV) if d['no_control'] == no_control), {})
-    context = {**alumno, **docinfo, 'reporte_no': numero}
+    alumno_raw  = next((a for a in cargar_csv(ALUMNOS_CSV)    if a['no_control'] == no_control), {})
+    docinfo_raw = next((d for d in cargar_csv(DOCUMENTOS_CSV) if d['no_control'] == no_control), {})
+    context = {}
+    context.update(normalize_context(alumno_raw))
+    context.update(normalize_context(docinfo_raw))
+    context['reporte_no'] = numero
     doc = DocxTemplate(TEMPLATE_BIM)
     doc.render(context)
     buf = BytesIO()
     doc.save(buf)
     buf.seek(0)
-    return send_file(buf, download_name=f"Reporte_Bimestral_{no_control}_Bim{numero}.docx", as_attachment=True)
+    return send_file(buf,
+                     download_name=f"Reporte_Bimestral_{no_control}_Bim{numero}.docx",
+                     as_attachment=True)
 
 @app.route('/generar_final/<no_control>')
 @login_required
 def generar_final(no_control):
-    alumno  = next((a for a in cargar_csv(ALUMNOS_CSV)    if a['no_control'] == no_control), {})
-    docinfo = next((d for d in cargar_csv(DOCUMENTOS_CSV) if d['no_control'] == no_control), {})
-    context = {**alumno, **docinfo}
+    alumno_raw  = next((a for a in cargar_csv(ALUMNOS_CSV)    if a['no_control'] == no_control), {})
+    docinfo_raw = next((d for d in cargar_csv(DOCUMENTOS_CSV) if d['no_control'] == no_control), {})
+    context = {}
+    context.update(normalize_context(alumno_raw))
+    context.update(normalize_context(docinfo_raw))
     doc = DocxTemplate(TEMPLATE_FINAL)
     doc.render(context)
     buf = BytesIO()
     doc.save(buf)
     buf.seek(0)
-    return send_file(buf, download_name=f"Reporte_Final_{no_control}.docx", as_attachment=True)
+    return send_file(buf,
+                     download_name=f"Reporte_Final_{no_control}.docx",
+                     as_attachment=True)
 
-# ── Manejador 404 ────────────────────────────────────────────────────────────
+# ── Error handlers ────────────────────────────────────────────────────────────
 
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html'), 404
 
-# ── Despliegue ────────────────────────────────────────────────────────────────
+# ── Run ────────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
