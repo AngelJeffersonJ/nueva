@@ -48,9 +48,8 @@ DOC_FIELDS = [
     'Fecha_Inicio','Fecha_Terminacion','Actividades',
     'TP_Edu_Adultos','TP_Desarrollo','TP_Deportivo','TP_Cultural','TP_Civico',
     'TP_Sustentable','TP_Salud','TP_Medio_Amb','TP_Otros',
-    # Fechas solicitud
     'Dia_Solicitud','Mes_Solicitud','Anio_Solicitud',
-    # Fechas bimestrales (3 bimestres)
+    # Bimestrales (3 bimestres)
     'Dia1_1','Mes1_1','Anio1_1','Dia2_1','Mes2_1','Anio2_1',
     'Dia1_2','Mes1_2','Anio1_2','Dia2_2','Mes2_2','Anio2_2',
     'Dia1_3','Mes1_3','Anio1_3','Dia2_3','Mes2_3','Anio2_3',
@@ -76,7 +75,7 @@ DOC_FIELDS = [
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 def cargar_csv(path):
-    """Carga un CSV y retorna lista de dicts; en caso de error, retorna lista vacía."""
+    """Carga un CSV y retorna lista de dicts; en error, retorna lista vacía."""
     try:
         if not os.path.isfile(path):
             app.logger.warning(f"CSV no encontrado: {path}")
@@ -152,7 +151,7 @@ def login():
 
 @app.route('/getAToken')
 def authorized():
-    code = request.args.get('code')
+    code   = request.args.get('code')
     msal_app = msal.ConfidentialClientApplication(
         CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
     )
@@ -201,7 +200,7 @@ def usuarios_new():
         usuarios = cargar_csv(USERS_CSV)
         nuevo = {
             'correo': request.form.get('correo','').strip().lower(),
-            'rol':    request.form.get('rol','').strip(),  
+            'rol':    request.form.get('rol','').strip(),
             'area':   request.form.get('area','').strip()
         }
         if not nuevo['correo']:
@@ -343,17 +342,20 @@ def alumnos_list():
 @roles_required('Administrador','Encargado','Maestro')
 def alumnos_new():
     if request.method == 'POST':
-        nueva = {
-            'No_Control': request.form.get('No_Control','').strip(),
-            'nombre':     request.form.get('nombre','').strip(),
-            'area':       request.form.get('area','').strip(),
-            'profesor':   request.form.get('profesor','').strip()
-        }
-        if not nueva['No_Control']:
+        no_ctl   = request.form.get('no_control','').strip()
+        nombre   = request.form.get('nombre','').strip()
+        area     = request.form.get('area','').strip()
+        profesor = request.form.get('profesor','').strip()
+        if not no_ctl:
             flash("No_Control es obligatorio", 'warning')
             return redirect(url_for('alumnos_new'))
         lst = cargar_csv(ALUMNOS_CSV)
-        lst.append(nueva)
+        lst.append({
+            'No_Control': no_ctl,
+            'nombre':     nombre,
+            'area':       area,
+            'profesor':   profesor
+        })
         guardar_csv(ALUMNOS_CSV, lst, ['No_Control','nombre','area','profesor'])
         return redirect(url_for('alumnos_list'))
     return render_template('alumnos_form.html', alumno={})
@@ -371,8 +373,13 @@ def alumnos_edit(no_control):
         alum['area']     = request.form.get('area','').strip()
         alum['profesor'] = request.form.get('profesor','').strip()
         guardar_csv(ALUMNOS_CSV, lst, ['No_Control','nombre','area','profesor'])
-        return	redirect(url_for('alumnos_list'))
-    return render_template('alumnos_form.html', alumno=alum)
+        return redirect(url_for('alumnos_list'))
+    return render_template('alumnos_form.html', alumno={
+        'no_control': alum['No_Control'],
+        'nombre':      alum['nombre'],
+        'area':        alum['area'],
+        'profesor':    alum['profesor']
+    })
 
 @app.route('/alumnos/delete/<no_control>')
 @roles_required('Administrador','Encargado','Maestro')
@@ -402,7 +409,7 @@ def documentos_new():
             return redirect(url_for('documentos_new'))
         alumno = next((a for a in alumnos if a.get('No_Control') == nuevo['No_Control']), {})
         for campo in ('Apellido_Paterno','Apellido_Materno','Nombre','Carrera'):
-            nuevo[campo] = alumno.get(campo, nuevo.get(campo,''))
+            nuevo[campo] = alumno.get(campo, nuevo.get(campo,''))  
         docs = cargar_csv(DOCUMENTOS_CSV)
         docs.append(nuevo)
         guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
@@ -478,8 +485,7 @@ def generar_todos_bimestrales(no_control):
             ctx = {**alum, **doci, 'reporte_no': num}
             doc = DocxTemplate(TPL_BIMESTRAL)
             doc.render(ctx)
-            b = BytesIO()
-            doc.save(b); b.seek(0)
+            b = BytesIO(); doc.save(b); b.seek(0)
             z.writestr(f"Reporte_Bimestral_{no_control}_B{num}.docx", b.read())
     zip_buf.seek(0)
     return send_file(
