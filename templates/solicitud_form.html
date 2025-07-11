@@ -1,51 +1,67 @@
 {% extends "layout.html" %}
 {% block title %}Solicitud – {{ no_control }}{% endblock %}
-
 {% block content %}
 <h3>Datos de Solicitud ({{ no_control }})</h3>
-
 <form method="post">
   <input type="hidden" name="No_Control" value="{{ no_control }}">
-
   {% set sfields = [
     'Apellido_Paterno','Apellido_Materno','Nombre','Sexo','Telefono','Correo','Domicilio',
-    'Carrera','Periodo','Semestre','Creditos',
-    'Dependencia','Domicilio_Dependencia','Titular_Dependencia','Cargo_Responsable',
-    'Responsable_Proyecto','Nombre_Programa','Modalidad_Externa','Modalidad_Interna',
-    'Fecha_Inicio','Fecha_Terminacion','Actividades',
-    'TP_Edu_Adultos','TP_Desarrollo','TP_Deportivo','TP_Cultural','TP_Civico',
-    'TP_Sustentable','TP_Salud','TP_Medio_Amb','TP_Otros'
+    'Carrera','Periodo','Semestre','Creditos','Dependencia','Domicilio_Dependencia',
+    'Titular_Dependencia','Cargo_Responsable','Responsable_Proyecto','Nombre_Programa',
+    'Fecha_Inicio','Fecha_Terminacion','Actividades'
   ] %}
   {% for field in sfields %}
     <div class="mb-3">
-      <label for="{{ field }}" class="form-label">{{ field.replace('_',' ') }}</label>
-      {% if field.startswith('TP_') %}
-        <div class="form-check">
-          <input type="checkbox"
-                 class="form-check-input"
-                 id="{{ field }}"
-                 name="{{ field }}"
-                 value="1"
-                 {% if documento.get(field)=='1' %}checked{% endif %}>
-          <label class="form-check-label" for="{{ field }}">{{ field.replace('TP_','')|replace('_',' ') }}</label>
-        </div>
-      {% elif field in ['Fecha_Inicio','Fecha_Terminacion'] %}
-        <input type="date" class="form-control" id="{{ field }}" name="{{ field }}"
-               value="{{ documento.get(field,'') }}">
-      {% elif field=='Sexo' %}
-        <select class="form-select" id="Sexo" name="Sexo" required>
+      <label class="form-label">{{ field.replace('_',' ') }}</label>
+      {% if field=='Sexo' %}
+        <select class="form-select" name="Sexo" required>
           <option value="">-- Sexo --</option>
-          <option value="M" {% if documento.get('Sexo')=='M' %}selected{% endif %}>Masculino</option>
-          <option value="F" {% if documento.get('Sexo')=='F' %}selected{% endif %}>Femenino</option>
+          <option value="M" {% if documento.Sexo=='M' %}selected{% endif %}>Masculino</option>
+          <option value="F" {% if documento.Sexo=='F' %}selected{% endif %}>Femenino</option>
         </select>
+      {% elif field in ['Fecha_Inicio','Fecha_Terminacion'] %}
+        <input type="date" class="form-control" name="{{ field }}"
+               value="{{ documento[field] or '' }}" required>
       {% elif field=='Actividades' %}
-        <textarea class="form-control" id="Actividades" name="Actividades" rows="3">{{ documento.get('Actividades','') }}</textarea>
+        <textarea class="form-control" name="Actividades" rows="3" required>{{ documento.Actividades or '' }}</textarea>
       {% else %}
-        <input type="text" class="form-control" id="{{ field }}" name="{{ field }}"
-               value="{{ documento.get(field,'') }}">
+        <input type="text" class="form-control" name="{{ field }}"
+               value="{{ documento[field] or '' }}" required>
       {% endif %}
     </div>
   {% endfor %}
+
+  <h5>Tipo de Proyecto (marca una X)</h5>
+  {% for key,label in [
+    ('TP_Edu_Adultos','Educación Adultos'),
+    ('TP_Desarrollo','Desarrollo'),
+    ('TP_Deportivo','Deportivo'),
+    ('TP_Cultural','Cultural'),
+    ('TP_Civico','Cívico'),
+    ('TP_Sustentable','Sustentable'),
+    ('TP_Salud','Salud'),
+    ('TP_Medio_Amb','Medio Ambiente'),
+    ('TP_Otros','Otros')
+  ] %}
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="radio"
+             name="{{ key }}" id="{{ key }}" value="X"
+             {% if documento[key]=='X' %}checked{% endif %} required>
+      <label class="form-check-label" for="{{ key }}">{{ label }}</label>
+    </div>
+  {% endfor %}
+
+  <div class="mb-3">
+    <label class="form-label">Fecha de Solicitud</label>
+    <div class="d-flex">
+      <input type="number" name="Dia_Solicitud" class="form-control me-1" placeholder="DD"
+             value="{{ documento.Dia_Solicitud or '' }}" required>
+      <input type="number" name="Mes_Solicitud" class="form-control me-1" placeholder="MM"
+             value="{{ documento.Mes_Solicitud or '' }}" required>
+      <input type="number" name="Anio_Solicitud" class="form-control" placeholder="AAAA"
+             value="{{ documento.Anio_Solicitud or '' }}" required>
+    </div>
+  </div>
 
   <button type="submit" class="btn btn-primary">Guardar Solicitud</button>
   <a href="{{ url_for('documentos_list') }}" class="btn btn-secondary">Cancelar</a>

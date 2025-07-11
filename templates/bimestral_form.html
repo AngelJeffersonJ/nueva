@@ -1,90 +1,83 @@
 {% extends "layout.html" %}
 {% block title %}Bimestral {{ num }} – {{ no_control }}{% endblock %}
-
 {% block content %}
 <h3>Reporte Bimestral B{{ num }} ({{ no_control }})</h3>
-
 <form method="post">
   <input type="hidden" name="No_Control" value="{{ no_control }}">
 
-  {# Fechas del bimestre #}
+  <!-- Fechas inicio/término -->
   <div class="row mb-3">
     <div class="col">
-      <label class="form-label">Inicio (D/M/A)</label>
+      <label class="form-label">Inicio (DD/MM/AAAA)</label>
       <div class="d-flex">
         <input type="number" name="Dia1_{{ num }}" class="form-control me-1" placeholder="DD"
-               value="{{ documento.get('Dia1_'~num,'') }}">
+               value="{{ documento['Dia1_'~num] or '' }}" required>
         <input type="number" name="Mes1_{{ num }}" class="form-control me-1" placeholder="MM"
-               value="{{ documento.get('Mes1_'~num,'') }}">
+               value="{{ documento['Mes1_'~num] or '' }}" required>
         <input type="number" name="Anio1_{{ num }}" class="form-control" placeholder="AAAA"
-               value="{{ documento.get('Anio1_'~num,'') }}">
+               value="{{ documento['Anio1_'~num] or '' }}" required>
       </div>
     </div>
     <div class="col">
-      <label class="form-label">Término (D/M/A)</label>
+      <label class="form-label">Término (DD/MM/AAAA)</label>
       <div class="d-flex">
         <input type="number" name="Dia2_{{ num }}" class="form-control me-1" placeholder="DD"
-               value="{{ documento.get('Dia2_'~num,'') }}">
+               value="{{ documento['Dia2_'~num] or '' }}" required>
         <input type="number" name="Mes2_{{ num }}" class="form-control me-1" placeholder="MM"
-               value="{{ documento.get('Mes2_'~num,'') }}">
+               value="{{ documento['Mes2_'~num] or '' }}" required>
         <input type="number" name="Anio2_{{ num }}" class="form-control" placeholder="AAAA"
-               value="{{ documento.get('Anio2_'~num,'') }}">
+               value="{{ documento['Anio2_'~num] or '' }}" required>
       </div>
     </div>
   </div>
 
-  {# Supervisor #}
+  <!-- Supervisor -->
   <div class="mb-3">
     <label class="form-label">Nombre del Supervisor</label>
     <input type="text" class="form-control" name="Nombre_supervisor"
-           value="{{ documento.get('Nombre_supervisor','') }}">
+           value="{{ documento.Nombre_supervisor or '' }}" required>
   </div>
   <div class="mb-3">
     <label class="form-label">Puesto del Supervisor</label>
     <input type="text" class="form-control" name="Puesto_supervisor"
-           value="{{ documento.get('Puesto_supervisor','') }}">
+           value="{{ documento.Puesto_supervisor or '' }}" required>
   </div>
 
-  {# Actividades #}
+  <!-- Actividades -->
   {% for i in range(1,9) %}
   <div class="mb-3">
     <label class="form-label">Actividad {{ i }}</label>
-    <input type="text" class="form-control"
-           name="Actividad_{{ i }}"
-           value="{{ documento.get('Actividad_'~i,'') }}">
+    <input type="text" class="form-control" name="Actividad_{{ i }}"
+           value="{{ documento['Actividad_'~i] or '' }}" required>
   </div>
   {% endfor %}
 
-  {# Bimestre (radio buttons) #}
+  <!-- Bimestre -->
   <div class="mb-3">
     <label class="form-label">Bimestre</label><br>
     {% for i in [1,2,3] %}
     <div class="form-check form-check-inline">
-      <input class="form-check-input"
-             type="radio"
-             name="bim"
-             id="b{{ i }}"
-             value="{{ i }}"
-             {% if documento.get('x'~i)== 'X' %}checked{% endif %}>
+      <input class="form-check-input" type="radio"
+             name="bim" id="b{{ i }}" value="{{ i }}"
+             {% if documento['x'~i]=='X' %}checked{% endif %} required>
       <label class="form-check-label" for="b{{ i }}">{{ i }}°</label>
     </div>
     {% endfor %}
   </div>
 
-  {# Evaluaciones: un radio por responsable y uno por estudiante #}
+  <!-- Evaluaciones -->
   <h5 class="mt-4">Evaluaciones</h5>
   {% for n in range(3,18) %}
-    <h6>Ítem {{ n }}</h6>
+    <h6>Ítem {{ n-2 }}</h6>
     <div class="row mb-2">
       <div class="col-12"><strong>Responsable</strong></div>
       {% for i in range(5) %}
       <div class="col">
         <div class="form-check">
           <input class="form-check-input" type="radio"
-                 name="resp{{ n }}"
-                 id="resp{{ n }}_{{ i }}"
+                 name="resp{{ n }}" id="resp{{ n }}_{{ i }}"
                  value="{{ i }}"
-                 {% if documento.get('resp'~n~'_'~i)=='X' %}checked{% endif %}>
+                 {% if documento['resp'~n~'_'~i]=='X' %}checked{% endif %} required>
           <label class="form-check-label" for="resp{{ n }}_{{ i }}">Nivel {{ i }}</label>
         </div>
       </div>
@@ -96,10 +89,9 @@
       <div class="col">
         <div class="form-check">
           <input class="form-check-input" type="radio"
-                 name="estu{{ n }}"
-                 id="estu{{ n }}_{{ i }}"
+                 name="estu{{ n }}" id="estu{{ n }}_{{ i }}"
                  value="{{ i }}"
-                 {% if documento.get('estu'~n~'_'~i)=='X' %}checked{% endif %}>
+                 {% if documento['estu'~n~'_'~i]=='X' %}checked{% endif %} required>
           <label class="form-check-label" for="estu{{ n }}_{{ i }}">Nivel {{ i }}</label>
         </div>
       </div>

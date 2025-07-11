@@ -1,55 +1,26 @@
 {% extends "layout.html" %}
 {% block title %}{{ alumno.get('No_Control') and 'Editar Alumno' or 'Nuevo Alumno' }}{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between mb-3">
   <h3>{{ alumno.get('No_Control') and 'Editar Alumno' or 'Nuevo Alumno' }}</h3>
 </div>
-
 <form method="post">
   <div class="mb-3">
     <label class="form-label">No. de Control</label>
-    <input
-      type="text"
-      name="No_Control"
-      class="form-control"
-      value="{{ alumno.get('No_Control','') }}"
-      {% if alumno.get('No_Control') %}readonly{% endif %}
-      required
-    >
+    <input type="text" name="No_Control" class="form-control" value="{{ alumno.get('No_Control','') }}" {% if alumno.get('No_Control') %}readonly{% endif %} required>
   </div>
-
   <div class="mb-3">
-    <label class="form-label">Nombre</label>
-    <input
-      type="text"
-      name="nombre"
-      class="form-control"
-      value="{{ alumno.get('nombre','') }}"
-      required
-    >
+    <label class="form-label">Nombre completo</label>
+    <input type="text" name="nombre" class="form-control" value="{{ alumno.get('nombre','') }}" required>
   </div>
-
   <div class="mb-3">
     <label class="form-label">Área</label>
-    <input
-      type="text"
-      name="area"
-      class="form-control"
-      value="{{ alumno.get('area','') }}"
-    >
+    <input type="text" name="area" class="form-control" value="{{ alumno.get('area','') }}" required>
   </div>
-
   <div class="mb-3">
     <label class="form-label">Profesor (correo)</label>
-    <input
-      type="email"
-      name="profesor"
-      class="form-control"
-      value="{{ alumno.get('profesor','') }}"
-    >
+    <input type="email" name="profesor" class="form-control" value="{{ alumno.get('profesor','') }}" required>
   </div>
-
   <button type="submit" class="btn btn-primary">Guardar</button>
   <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>
 </form>

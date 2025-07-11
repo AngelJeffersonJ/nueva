@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}Configuración de Documentos{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h3>Configuración de Documentos</h3>
@@ -26,19 +25,11 @@
         {{ alum and alum[0].nombre or '—' }}
       </td>
       <td class="text-nowrap">
-        <a href="{{ url_for('documentos_edit', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-primary me-1">✎ Editar</a>
-        <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-info me-1">📄 Solicitud</a>
-        <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}"
-           class="btn btn-sm btn-warning me-1">1° Bimestre</a>
-        <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-success me-1">🏁 Final</a>
-        <a href="{{ url_for('documentos_delete', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-danger"
-           onclick="return confirm('¿Seguro que quieres eliminar esta configuración?');">
-          🗑️ Eliminar
-        </a>
+        <a href="{{ url_for('documentos_edit', no_control=d['No_Control']) }}" class="btn btn-sm btn-primary me-1">✎ Editar</a>
+        <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}" class="btn btn-sm btn-info me-1">📄 Solicitud</a>
+        <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-sm btn-warning me-1">1° Bimestre</a>
+        <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}" class="btn btn-sm btn-success me-1">🏁 Final</a>
+        <a href="{{ url_for('documentos_delete', no_control=d['No_Control']) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar?');">🗑️</a>
       </td>
     </tr>
     {% endfor %}
