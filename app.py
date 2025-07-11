@@ -47,26 +47,25 @@ DOC_FIELDS = [
     'Carrera','Periodo','Semestre','Creditos',
     'Dependencia','Domicilio_Dependencia','Titular_Dependencia','Cargo_Responsable',
     'Responsable_Proyecto','Nombre_Programa',
-    # TP_ radio: solo uno debe marcarse con 'X'
+    # Tipo Proyecto (radio)
     'TP_Edu_Adultos','TP_Desarrollo','TP_Deportivo','TP_Cultural','TP_Civico',
     'TP_Sustentable','TP_Salud','TP_Medio_Amb','TP_Otros',
     'Fecha_Inicio','Fecha_Terminacion','Actividades',
-    'Dia_Solicitud','Mes_Solicitud','Anio_Solicitud',
-    # Bimestrales fechas
+    'Dia_Solicitud','Mes_Solicitud','Anio_Solicitud'
 ] + [f'{part}_{n}' for n in (1,2,3) for part in ('Dia1','Mes1','Anio1','Dia2','Mes2','Anio2')] + [
     'Nombre_supervisor','Puesto_supervisor'
 ] + [f'Actividad_{i}' for i in range(1,9)] + [
     'x1','x2','x3'
 ] + [f'resp{n}_{i}' for n in range(3,18) for i in range(5)] + [
-] + [f'estu{n}_{i}' for n in range(3,18) for i in range(5)] + [
-    # Final
+    f'estu{n}_{i}' for n in range(3,18) for i in range(5)
+] + [
     'Municipio','Estado'
 ] + [f'Actividad{i}' for i in range(1,9)] + [f'Logro{i}' for i in range(1,9)] + [
-] + [f'Aprendizaje{i}' for i in range(1,9)] + [f'Beneficio{i}' for i in range(1,9)] + [
+    f'Aprendizaje{i}' for i in range(1,9)] + [f'Beneficio{i}' for i in range(1,9)] + [
     'Nombre_Responsable','Cargo_Responsable','Num_Control'
 ]
 
-# ── Funciones auxiliares ───────────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def cargar_csv(path):
     if not os.path.isfile(path):
         return []
@@ -112,8 +111,7 @@ def _render_docx(template_path, context, filename):
         doc = DocxTemplate(template_path)
         doc.render(context)
         buf = BytesIO()
-        doc.save(buf)
-        buf.seek(0)
+        doc.save(buf); buf.seek(0)
         return send_file(
             buf,
             as_attachment=True,
@@ -125,10 +123,272 @@ def _render_docx(template_path, context, filename):
         flash("Error generando el documento", "danger")
         return redirect(url_for('dashboard'))
 
-# ── Autenticación y CRUD Usuarios/Áreas/Profesores/Alumnos (sin cambios) ──
-# Omite aquí por brevedad; usa tu código existente.
+# ── Autenticación ─────────────────────────────────────────────────────────────
+@app.route('/login')
+def login():
+    msal_app = msal.ConfidentialClientApplication(
+        CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
+    )
+    auth_url = msal_app.get_authorization_request_url(scopes=SCOPE, redirect_uri=REDIRECT_URI)
+    return redirect(auth_url)
 
-# ── Solicitud (GET/POST) ───────────────────────────────────────────────────────
+@app.route('/getAToken')
+def authorized():
+    code = request.args.get('code')
+    msal_app = msal.ConfidentialClientApplication(
+        CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET
+    )
+    result = msal_app.acquire_token_by_authorization_code(code, scopes=SCOPE, redirect_uri=REDIRECT_URI)
+    if 'error' in result:
+        flash(result.get('error_description','Error al autenticar'),'danger')
+        return redirect(url_for('login'))
+    claims = result['id_token_claims']
+    email = claims.get('preferred_username','').lower()
+    if not email.endswith('@aguascalientes.tecnm.mx'):
+        return "Solo cuentas institucionales", 403
+    usuarios = cargar_csv(USERS_CSV)
+    perfil = next((u for u in usuarios if u['correo'].lower()==email), None)
+    if not perfil:
+        perfil = {'correo':email,'rol':'Alumno','area':''}
+    session.update(user=perfil, role=perfil['rol'], name=claims.get('name',''))
+    return redirect(url_for('dashboard'))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(
+        f"{AUTHORITY}/oauth2/v2.0/logout?post_logout_redirect_uri={url_for('login', _external=True)}"
+    )
+
+# ── Dashboard ─────────────────────────────────────────────────────────────────
+@app.route('/')
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
+# ── CRUD Usuarios ─────────────────────────────────────────────────────────────
+@app.route('/usuarios')
+@roles_required('Administrador')
+def usuarios_list():
+    return render_template('usuarios_list.html', usuarios=cargar_csv(USERS_CSV))
+
+@app.route('/usuarios/new', methods=['GET','POST'])
+@roles_required('Administrador')
+def usuarios_new():
+    if request.method == 'POST':
+        usuarios = cargar_csv(USERS_CSV)
+        nuevo = {
+            'correo': request.form.get('correo','').strip().lower(),
+            'rol':    request.form.get('rol','').strip(),
+            'area':   request.form.get('area','').strip()
+        }
+        if not nuevo['correo']:
+            flash("El correo es obligatorio","warning")
+            return redirect(url_for('usuarios_new'))
+        usuarios.append(nuevo)
+        guardar_csv(USERS_CSV, usuarios, ['correo','rol','area'])
+        return redirect(url_for('usuarios_list'))
+    return render_template('usuarios_form.html', usuario={})
+
+@app.route('/usuarios/edit/<correo>', methods=['GET','POST'])
+@roles_required('Administrador')
+def usuarios_edit(correo):
+    usuarios = cargar_csv(USERS_CSV)
+    perfil = next((u for u in usuarios if u['correo']==correo), None)
+    if not perfil:
+        flash("Usuario no encontrado","danger")
+        return redirect(url_for('usuarios_list'))
+    if request.method == 'POST':
+        perfil['rol']  = request.form.get('rol','').strip()
+        perfil['area'] = request.form.get('area','').strip()
+        guardar_csv(USERS_CSV, usuarios, ['correo','rol','area'])
+        return redirect(url_for('usuarios_list'))
+    return render_template('usuarios_form.html', usuario=perfil)
+
+@app.route('/usuarios/delete/<correo>')
+@roles_required('Administrador')
+def usuarios_delete(correo):
+    usuarios = [u for u in cargar_csv(USERS_CSV) if u['correo']!=correo]
+    guardar_csv(USERS_CSV, usuarios, ['correo','rol','area'])
+    return redirect(url_for('usuarios_list'))
+
+# ── CRUD Áreas ───────────────────────────────────────────────────────────────
+@app.route('/areas')
+@roles_required('Administrador','Encargado')
+def areas_list():
+    return render_template('areas_list.html', areas=cargar_csv(AREAS_CSV))
+
+@app.route('/areas/new', methods=['GET','POST'])
+@roles_required('Administrador','Encargado')
+def areas_new():
+    if request.method == 'POST':
+        areas = cargar_csv(AREAS_CSV)
+        nueva = {
+            'id':        str(uuid.uuid4()),
+            'nombre':    request.form.get('nombre','').strip(),
+            'encargado': request.form.get('encargado','').strip()
+        }
+        if not nueva['nombre']:
+            flash("El nombre es obligatorio","warning")
+            return redirect(url_for('areas_new'))
+        areas.append(nueva)
+        guardar_csv(AREAS_CSV, areas, ['id','nombre','encargado'])
+        return redirect(url_for('areas_list'))
+    return render_template('areas_form.html', area={})
+
+@app.route('/areas/edit/<id>', methods=['GET','POST'])
+@roles_required('Administrador','Encargado')
+def areas_edit(id):
+    areas = cargar_csv(AREAS_CSV)
+    area = next((a for a in areas if a['id']==id), None)
+    if not area:
+        flash("Área no encontrada","danger")
+        return redirect(url_for('areas_list'))
+    if request.method == 'POST':
+        area['nombre']    = request.form.get('nombre','').strip()
+        area['encargado'] = request.form.get('encargado','').strip()
+        guardar_csv(AREAS_CSV, areas, ['id','nombre','encargado'])
+        return redirect(url_for('areas_list'))
+    return render_template('areas_form.html', area=area)
+
+@app.route('/areas/delete/<id>')
+@roles_required('Administrador','Encargado')
+def areas_delete(id):
+    areas = [a for a in cargar_csv(AREAS_CSV) if a['id']!=id]
+    guardar_csv(AREAS_CSV, areas, ['id','nombre','encargado'])
+    return redirect(url_for('areas_list'))
+
+# ── CRUD Profesores ──────────────────────────────────────────────────────────
+@app.route('/profesores')
+@roles_required('Administrador','Encargado')
+def profesores_list():
+    return render_template('profesores_list.html', profesores=cargar_csv(PROFESORES_CSV))
+
+@app.route('/profesores/new', methods=['GET','POST'])
+@roles_required('Administrador','Encargado')
+def profesores_new():
+    if request.method == 'POST':
+        profs = cargar_csv(PROFESORES_CSV)
+        nuevo = {
+            'correo': request.form.get('correo','').strip().lower(),
+            'nombre': request.form.get('nombre','').strip(),
+            'area':   request.form.get('area','').strip()
+        }
+        if not nuevo['correo']:
+            flash("El correo es obligatorio","warning")
+            return redirect(url_for('profesores_new'))
+        profs.append(nuevo)
+        guardar_csv(PROFESORES_CSV, profs, ['correo','nombre','area'])
+        return redirect(url_for('profesores_list'))
+    return render_template('profesores_form.html', profesor={})
+
+@app.route('/profesores/edit/<correo>', methods=['GET','POST'])
+@roles_required('Administrador','Encargado')
+def profesores_edit(correo):
+    profs = cargar_csv(PROFESORES_CSV)
+    prof = next((p for p in profs if p['correo']==correo), None)
+    if not prof:
+        flash("Profesor no encontrado","danger")
+        return redirect(url_for('profesores_list'))
+    if request.method == 'POST':
+        prof['nombre'] = request.form.get('nombre','').strip()
+        prof['area']   = request.form.get('area','').strip()
+        guardar_csv(PROFESORES_CSV, profs, ['correo','nombre','area'])
+        return redirect(url_for('profesores_list'))
+    return render_template('profesores_form.html', profesor=prof)
+
+@app.route('/profesores/delete/<correo>')
+@roles_required('Administrador','Encargado')
+def profesores_delete(correo):
+    profs = [p for p in cargar_csv(PROFESORES_CSV) if p['correo']!=correo]
+    guardar_csv(PROFESORES_CSV, profs, ['correo','nombre','area'])
+    return redirect(url_for('profesores_list'))
+
+# ── CRUD Alumnos ─────────────────────────────────────────────────────────────
+@app.route('/alumnos')
+@login_required
+def alumnos_list():
+    alumnos = cargar_csv(ALUMNOS_CSV)
+    role = session.get('role')
+    usr  = session.get('user', {})
+    if role == 'Maestro':
+        alumnos = [a for a in alumnos if a['profesor'].lower() == usr['correo'].lower()]
+    elif role == 'Encargado':
+        alumnos = [a for a in alumnos if a['area'] == usr['area']]
+    return render_template('alumnos_list.html', alumnos=alumnos)
+
+@app.route('/alumnos/new', methods=['GET','POST'])
+@roles_required('Administrador','Encargado','Maestro')
+def alumnos_new():
+    if request.method == 'POST':
+        no_ctl = request.form.get('No_Control','').strip()
+        if not no_ctl:
+            flash("No_Control es obligatorio","warning")
+            return redirect(url_for('alumnos_new'))
+        lst = cargar_csv(ALUMNOS_CSV)
+        lst.append({
+            'No_Control': no_ctl,
+            'nombre':     request.form.get('nombre','').strip(),  
+            'area':       request.form.get('area','').strip(),
+            'profesor':   request.form.get('profesor','').strip()
+        })
+        guardar_csv(ALUMNOS_CSV, lst, ['No_Control','nombre','area','profesor'])
+        return redirect(url_for('alumnos_list'))
+    return render_template('alumnos_form.html', alumno={})
+
+@app.route('/alumnos/edit/<No_Control>', methods=['GET','POST'])
+@roles_required('Administrador','Encargado','Maestro')
+def alumnos_edit(No_Control):
+    lst = cargar_csv(ALUMNOS_CSV)
+    alum = next((a for a in lst if a['No_Control'] == No_Control), None)
+    if not alum:
+        flash("Alumno no encontrado","danger")
+        return redirect(url_for('alumnos_list'))
+    if request.method == 'POST':
+        alum['nombre']   = request.form.get('nombre','').strip()
+        alum['area']     = request.form.get('area','').strip()
+        alum['profesor'] = request.form.get('profesor','').strip()
+        guardar_csv(ALUMNOS_CSV, lst, ['No_Control','nombre','area','profesor'])
+        return redirect(url_for('alumnos_list'))
+    return render_template('alumnos_form.html', alumno=alum)
+
+@app.route('/alumnos/delete/<No_Control>')
+@roles_required('Administrador','Encargado','Maestro')
+def alumnos_delete(No_Control):
+    lst = [a for a in cargar_csv(ALUMNOS_CSV) if a['No_Control'] != No_Control]
+    guardar_csv(ALUMNOS_CSV, lst, ['No_Control','nombre','area','profesor'])
+    return redirect(url_for('alumnos_list'))
+
+# ── CRUD Documentos ───────────────────────────────────────────────────────────
+@app.route('/documentos')
+@login_required
+def documentos_list():
+    return render_template(
+        'documentos_list.html',
+        documentos=cargar_csv(DOCUMENTOS_CSV),
+        alumnos=cargar_csv(ALUMNOS_CSV)
+    )
+
+@app.route('/documentos/new')
+@login_required
+def documentos_new():
+    flash("Para crear o editar documentos usa los botones de Solicitud, Bimestral o Final.", "info")
+    return redirect(url_for('documentos_list'))
+
+@app.route('/documentos/edit/<no_control>')
+@login_required
+def documentos_edit(no_control):
+    return redirect(url_for('documentos_solicitud', no_control=no_control))
+
+@app.route('/documentos/delete/<no_control>')
+@login_required
+def documentos_delete(no_control):
+    docs = [d for d in cargar_csv(DOCUMENTOS_CSV) if d['No_Control'] != no_control]
+    guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
+    return redirect(url_for('documentos_list'))
+
+# ── Solicitud ─────────────────────────────────────────────────────────────────
 SOL_TEXT_FIELDS = [
     'Apellido_Paterno','Apellido_Materno','Nombre','Sexo','Telefono','Correo','Domicilio',
     'Carrera','Periodo','Semestre','Creditos','Dependencia','Domicilio_Dependencia',
@@ -146,31 +406,24 @@ def documentos_solicitud(no_control):
     docs = cargar_csv(DOCUMENTOS_CSV)
     doc  = next((d for d in docs if d['No_Control']==no_control), None)
     if request.method == 'POST':
-        # validar todos los textos
         faltan = [f for f in SOL_TEXT_FIELDS if not request.form.get(f)]
-        # validar TP_ radio: exactamente 1 marcada
         tp_sel = [f for f in SOL_TP_FIELDS if request.form.get(f)]
         if len(tp_sel) != 1:
-            faltan += ['TP (un solo tipo de proyecto)']
-        # validar fecha solicitud
+            faltan.append('Tipo de Proyecto')
         for part in ('Dia_Solicitud','Mes_Solicitud','Anio_Solicitud'):
             if not request.form.get(part):
                 faltan.append(part)
         if faltan:
             flash("Completa todos los campos: " + ", ".join(faltan), "warning")
             return redirect(request.url)
-        # crear o actualizar
         if not doc:
             doc = {k: '' for k in DOC_FIELDS}
             doc['No_Control'] = no_control
             docs.append(doc)
-        # guardar textos
         for f in SOL_TEXT_FIELDS:
             doc[f] = request.form[f].strip()
-        # guardar TP_
         for f in SOL_TP_FIELDS:
             doc[f] = 'X' if f in tp_sel else ''
-        # guardar fecha solicitud
         for part in ('Dia_Solicitud','Mes_Solicitud','Anio_Solicitud'):
             doc[part] = request.form[part].strip()
         guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
@@ -178,7 +431,7 @@ def documentos_solicitud(no_control):
         return redirect(url_for('documentos_list'))
     return render_template('solicitud_form.html', no_control=no_control, documento=doc or {})
 
-# ── Bimestral (GET/POST) ──────────────────────────────────────────────────────
+# ── Bimestral ─────────────────────────────────────────────────────────────────
 @app.route('/documentos/bimestral/<no_control>/<int:num>', methods=['GET','POST'])
 @login_required
 def documentos_bimestral(no_control, num):
@@ -189,11 +442,9 @@ def documentos_bimestral(no_control, num):
     doc  = next((d for d in docs if d['No_Control']==no_control), None)
     if request.method == 'POST':
         faltan = []
-        # fechas
         for part in ('Dia1','Mes1','Anio1','Dia2','Mes2','Anio2'):
             if not request.form.get(f"{part}_{num}"):
                 faltan.append(f"{part}_{num}")
-        # supervisor y actividades
         if not request.form.get('Nombre_supervisor'):
             faltan.append('Nombre_supervisor')
         if not request.form.get('Puesto_supervisor'):
@@ -201,39 +452,30 @@ def documentos_bimestral(no_control, num):
         for i in range(1,9):
             if not request.form.get(f"Actividad_{i}"):
                 faltan.append(f"Actividad_{i}")
-        # bimestre radio
         if not request.form.get('bim'):
             faltan.append('bim')
-        # evaluaciones
         for n in range(3,18):
-            if not request.form.get(f"resp{n}"):
-                faltan.append(f"resp{n}")
-            if not request.form.get(f"estu{n}"):
-                faltan.append(f"estu{n}")
+            if not request.form.get(f"resp{n}") or not request.form.get(f"estu{n}"):
+                faltan.append(f"resp{n}/estu{n}")
         if faltan:
             flash("Completa todos los campos: " + ", ".join(faltan), "warning")
             return redirect(request.url)
-        # crear/actualizar
         if not doc:
             doc = {k: '' for k in DOC_FIELDS}
             doc['No_Control'] = no_control
             docs.append(doc)
-        # fechas
         for part in ('Dia1','Mes1','Anio1','Dia2','Mes2','Anio2'):
             doc[f"{part}_{num}"] = request.form[f"{part}_{num}"]
-        # supervisor y actividades
         doc['Nombre_supervisor'] = request.form['Nombre_supervisor']
         doc['Puesto_supervisor'] = request.form['Puesto_supervisor']
         for i in range(1,9):
             doc[f"Actividad_{i}"] = request.form[f"Actividad_{i}"]
-        # bimestre
         sel = request.form['bim']
         doc['x1'], doc['x2'], doc['x3'] = (
             'X' if sel=='1' else '',
             'X' if sel=='2' else '',
             'X' if sel=='3' else ''
         )
-        # evaluaciones
         for n in range(3,18):
             for i in range(5):
                 doc[f"resp{n}_{i}"] = ''
@@ -245,20 +487,16 @@ def documentos_bimestral(no_control, num):
         guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
         flash(f"Bimestral {num} guardado", "success")
         return redirect(url_for('documentos_list'))
-    return render_template(
-        'bimestral_form.html',
-        no_control=no_control,
-        num=num,
-        documento=doc or {}
-    )
+    return render_template('bimestral_form.html',
+                           no_control=no_control, num=num, documento=doc or {})
 
-# ── Final (GET/POST) ──────────────────────────────────────────────────────────
+# ── Final ─────────────────────────────────────────────────────────────────────
 FINAL_FIELDS = (
     ['Municipio','Estado'] +
     [f'Actividad{i}' for i in range(1,9)] +
-    [f'Logro{i}'     for i in range(1,9)] +
+    [f'Logro{i}' for i in range(1,9)] +
     [f'Aprendizaje{i}' for i in range(1,9)] +
-    [f'Beneficio{i}'   for i in range(1,9)] +
+    [f'Beneficio{i}' for i in range(1,9)] +
     ['Nombre_Responsable','Cargo_Responsable','Num_Control']
 )
 
@@ -281,13 +519,10 @@ def documentos_final(no_control):
         guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
         flash("Reporte final guardado", "success")
         return redirect(url_for('documentos_list'))
-    return render_template(
-        'final_form.html',
-        no_control=no_control,
-        documento=doc or {}
-    )
+    return render_template('final_form.html',
+                           no_control=no_control, documento=doc or {})
 
-# ── Generación de DOCX ───────────────────────────────────────────────────────
+# ── Generación DOCX ────────────────────────────────────────────────────────────
 @app.route('/generar_solicitud/<no_control>')
 @login_required
 def generar_solicitud(no_control):
@@ -298,11 +533,8 @@ def generar_solicitud(no_control):
     if not alum or not doci:
         flash("Datos incompletos", "warning")
         return redirect(url_for('documentos_list'))
-    return _render_docx(
-        TPL_SOLICITUD,
-        {**alum, **doci},
-        f"Solicitud_{no_control}.docx"
-    )
+    return _render_docx(TPL_SOLICITUD, {**alum, **doci},
+                        f"Solicitud_{no_control}.docx")
 
 @app.route('/generar_bimestral/<no_control>/<int:num>')
 @login_required
@@ -317,11 +549,9 @@ def generar_bimestral(no_control, num):
     if not alum or not doci:
         flash("Datos incompletos", "warning")
         return redirect(url_for('documentos_list'))
-    return _render_docx(
-        TPL_BIMESTRAL,
-        {**alum, **doci, 'reporte_no': num},
-        f"Bimestral_{no_control}_B{num}.docx"
-    )
+    return _render_docx(TPL_BIMESTRAL,
+                        {**alum, **doci, 'reporte_no': num},
+                        f"Bimestral_{no_control}_B{num}.docx")
 
 @app.route('/generar_final/<no_control>')
 @login_required
@@ -333,11 +563,8 @@ def generar_final(no_control):
     if not alum or not doci:
         flash("Datos incompletos", "warning")
         return redirect(url_for('documentos_list'))
-    return _render_docx(
-        TPL_FINAL,
-        {**alum, **doci},
-        f"Final_{no_control}.docx"
-    )
+    return _render_docx(TPL_FINAL, {**alum, **doci},
+                        f"Final_{no_control}.docx")
 
 # ── Error 404 ─────────────────────────────────────────────────────────────────
 @app.errorhandler(404)
