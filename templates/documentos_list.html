@@ -22,27 +22,18 @@
     <tr>
       <td>{{ d['No_Control'] }}</td>
       <td>
-        {# Buscamos el nombre del alumno en la lista de alumnos #}
         {% set alum = alumnos | selectattr('No_Control','equalto', d['No_Control']) | list %}
         {{ alum and alum[0].nombre or '—' }}
       </td>
       <td class="text-nowrap">
         <a href="{{ url_for('documentos_edit', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-primary me-1">
-          ✎ Editar
-        </a>
+           class="btn btn-sm btn-primary me-1">✎ Editar</a>
         <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-info me-1">
-          📄 Solicitud
-        </a>
+           class="btn btn-sm btn-info me-1">📄 Solicitud</a>
         <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}"
-           class="btn btn-sm btn-warning me-1">
-          1° Bimestre
-        </a>
+           class="btn btn-sm btn-warning me-1">1° Bimestre</a>
         <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}"
-           class="btn btn-sm btn-success me-1">
-          🏁 Final
-        </a>
+           class="btn btn-sm btn-success me-1">🏁 Final</a>
         <a href="{{ url_for('documentos_delete', no_control=d['No_Control']) }}"
            class="btn btn-sm btn-danger"
            onclick="return confirm('¿Seguro que quieres eliminar esta configuración?');">

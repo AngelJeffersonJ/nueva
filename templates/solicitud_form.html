@@ -7,7 +7,6 @@
 <form method="post">
   <input type="hidden" name="No_Control" value="{{ no_control }}">
 
-  {# Campos de Solicitud según plantilla_solicitud_completa.docx #}
   {% set sfields = [
     'Apellido_Paterno','Apellido_Materno','Nombre','Sexo','Telefono','Correo','Domicilio',
     'Carrera','Periodo','Semestre','Creditos',
@@ -19,11 +18,7 @@
   ] %}
   {% for field in sfields %}
     <div class="mb-3">
-      <label for="{{ field }}" class="form-label">
-        {{ field.replace('_',' ') }}
-      </label>
-
-      {# checkbox para los TP_ #}
+      <label for="{{ field }}" class="form-label">{{ field.replace('_',' ') }}</label>
       {% if field.startswith('TP_') %}
         <div class="form-check">
           <input type="checkbox"
@@ -32,40 +27,21 @@
                  name="{{ field }}"
                  value="1"
                  {% if documento.get(field)=='1' %}checked{% endif %}>
-          <label class="form-check-label" for="{{ field }}">
-            {{ field.replace('TP_','')|replace('_',' ') }}
-          </label>
+          <label class="form-check-label" for="{{ field }}">{{ field.replace('TP_','')|replace('_',' ') }}</label>
         </div>
-
-      {# date-picker para fechas #}
       {% elif field in ['Fecha_Inicio','Fecha_Terminacion'] %}
-        <input type="date"
-               class="form-control"
-               id="{{ field }}"
-               name="{{ field }}"
+        <input type="date" class="form-control" id="{{ field }}" name="{{ field }}"
                value="{{ documento.get(field,'') }}">
-
-      {# select para Sexo #}
       {% elif field=='Sexo' %}
         <select class="form-select" id="Sexo" name="Sexo" required>
           <option value="">-- Sexo --</option>
           <option value="M" {% if documento.get('Sexo')=='M' %}selected{% endif %}>Masculino</option>
           <option value="F" {% if documento.get('Sexo')=='F' %}selected{% endif %}>Femenino</option>
         </select>
-
-      {# textarea para Actividades #}
       {% elif field=='Actividades' %}
-        <textarea class="form-control"
-                  id="Actividades"
-                  name="Actividades"
-                  rows="3">{{ documento.get('Actividades','') }}</textarea>
-
-      {# inputs de texto para el resto #}
+        <textarea class="form-control" id="Actividades" name="Actividades" rows="3">{{ documento.get('Actividades','') }}</textarea>
       {% else %}
-        <input type="text"
-               class="form-control"
-               id="{{ field }}"
-               name="{{ field }}"
+        <input type="text" class="form-control" id="{{ field }}" name="{{ field }}"
                value="{{ documento.get(field,'') }}">
       {% endif %}
     </div>

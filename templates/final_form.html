@@ -6,16 +6,19 @@
 
 <form method="post">
   <input type="hidden" name="No_Control" value="{{ no_control }}">
+  <input type="hidden" name="Num_Control"   value="{{ no_control }}">
 
   {# Municipio, Estado #}
   <div class="row mb-3">
     <div class="col">
       <label class="form-label">Municipio</label>
-      <input type="text" class="form-control" name="Municipio" value="{{ documento.get('Municipio','') }}">
+      <input type="text" class="form-control" name="Municipio"
+             value="{{ documento.get('Municipio','') }}">
     </div>
     <div class="col">
       <label class="form-label">Estado</label>
-      <input type="text" class="form-control" name="Estado" value="{{ documento.get('Estado','') }}">
+      <input type="text" class="form-control" name="Estado"
+             value="{{ documento.get('Estado','') }}">
     </div>
   </div>
 
@@ -30,8 +33,8 @@
   <div class="mb-3">
     <label class="form-label">Logro {{ i }}</label>
     <input type="text" class="form-control"
-           name="Logro{{ i }}"
-           value="{{ documento.get('Logro'~i,'') }}">
+           name="Logro {{ i }}"
+           value="{{ documento.get('Logro '~i,'') }}">
   </div>
   {% endfor %}
 

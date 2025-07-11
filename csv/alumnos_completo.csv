@@ -1,4 +1,2 @@
-No_Control,nombre,area,profesor
-20210001,Ana Márquez,TI,ricardo.martinez@aguascalientes.tecnm.mx
-20210002,Carlos Rivera,Desarrollo,juan.perez@aguascalientes.tecnm.mx
-20210003,María Fernández,Electrónica,laura.gomez@aguascalientes.tecnm.mx
+No_Control,Apellido_Paterno,Apellido_Materno,Nombre,Carrera,area,profesor
+20230001,López,García,María Fernanda,Ingeniería en Sistemas,TI,juan.perez@aguascalientes.tecnm.mx
