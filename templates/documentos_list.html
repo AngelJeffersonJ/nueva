@@ -1,85 +1,56 @@
 {% extends "layout.html" %}
-
 {% block content %}
 <div class="container mt-4">
-    <h2>Listado de Documentos</h2>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>No. Control</th>
-                <th>Nombre</th>
-                <th>Solicitud</th>
-                <th>Bimestral 1</th>
-                <th>Bimestral 2</th>
-                <th>Bimestral 3</th>
-                <th>Final</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for d in documentos %}
-            <tr>
-                <td>{{ d['No_Control'] }}</td>
-                {# Buscar nombre desde alumnos #}
-                <td>
-                  {% set al = alumnos | selectattr('No_Control', 'equalto', d['No_Control']) | list %}
-                  {% if al and al[0]['nombre'] %}
-                    {{ al[0]['nombre'] }}
-                  {% else %}
-                    -
-                  {% endif %}
-                </td>
-                <td>
-                    <a href="{{ url_for('documentos_solicitud', no_control=d['No_Control']) }}" class="btn btn-sm btn-info">
-                        Solicitud
-                    </a>
-                    <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}" class="btn btn-sm btn-success" title="Descargar">
-                        <i class="fa fa-download"></i>
-                    </a>
-                </td>
-                <td>
-                    <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-sm btn-info">
-                        Bim 1
-                    </a>
-                    <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-sm btn-success" title="Descargar">
-                        <i class="fa fa-download"></i>
-                    </a>
-                </td>
-                <td>
-                    <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=2) }}" class="btn btn-sm btn-info">
-                        Bim 2
-                    </a>
-                    <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=2) }}" class="btn btn-sm btn-success" title="Descargar">
-                        <i class="fa fa-download"></i>
-                    </a>
-                </td>
-                <td>
-                    <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=3) }}" class="btn btn-sm btn-info">
-                        Bim 3
-                    </a>
-                    <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=3) }}" class="btn btn-sm btn-success" title="Descargar">
-                        <i class="fa fa-download"></i>
-                    </a>
-                </td>
-                <td>
-                    <a href="{{ url_for('documentos_final', no_control=d['No_Control']) }}" class="btn btn-sm btn-info">
-                        Final
-                    </a>
-                    <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}" class="btn btn-sm btn-success" title="Descargar">
-                        <i class="fa fa-download"></i>
-                    </a>
-                </td>
-                <td>
-                    <!-- Puedes agregar aquí acciones adicionales, como eliminar o editar -->
-                    <a href="{{ url_for('documentos_delete', no_control=d['No_Control']) }}"
-                       onclick="return confirm('¿Seguro que deseas eliminar este registro?');"
-                       class="btn btn-sm btn-danger">
-                        <i class="fa fa-trash"></i>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <h2>Listado de Documentos</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>No. Control</th>
+        <th>Nombre</th>
+        <th>Solicitud</th>
+        <th>Bimestral 1</th>
+        <th>Bimestral 2</th>
+        <th>Bimestral 3</th>
+        <th>Final</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in documentos %}
+        {% if d['No_Control'] %}
+        <tr>
+          <td>{{ d['No_Control'] }}</td>
+          <td>
+            {% set alumno = (alumnos | selectattr('No_Control', 'equalto', d['No_Control']) | list | first) %}
+            {{ alumno['nombre'] if alumno else '-' }}
+          </td>
+          <td>
+            <a href="{{ url_for('documentos_solicitud', no_control=d['No_Control']) }}" class="btn btn-info btn-sm">Solicitud</a>
+            <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}" class="btn btn-success btn-sm"> <span class="fa fa-download"></span></a>
+          </td>
+          <td>
+            <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-info btn-sm">Bim 1</a>
+            <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-success btn-sm"><span class="fa fa-download"></span></a>
+          </td>
+          <td>
+            <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=2) }}" class="btn btn-info btn-sm">Bim 2</a>
+            <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=2) }}" class="btn btn-success btn-sm"><span class="fa fa-download"></span></a>
+          </td>
+          <td>
+            <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=3) }}" class="btn btn-info btn-sm">Bim 3</a>
+            <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=3) }}" class="btn btn-success btn-sm"><span class="fa fa-download"></span></a>
+          </td>
+          <td>
+            <a href="{{ url_for('documentos_final', no_control=d['No_Control']) }}" class="btn btn-info btn-sm">Final</a>
+            <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}" class="btn btn-success btn-sm"><span class="fa fa-download"></span></a>
+          </td>
+          <td>
+            <a href="{{ url_for('documentos_delete', no_control=d['No_Control']) }}" class="btn btn-danger btn-sm">Eliminar</a> 
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}
