@@ -1,28 +1,24 @@
 {% extends "layout.html" %}
-{% block title %}Alumnos{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
-  <h2>Alumnos</h2>
-  <a href="{{ url_for('alumnos_new') }}" class="btn btn-success">Nuevo Alumno</a>
-</div>
-<table class="table table-bordered">
-  <thead class="table-dark">
+<h2>Alumnos</h2>
+<a class="btn btn-primary mb-2" href="{{ url_for('alumnos_new') }}">Nuevo Alumno</a>
+<table class="table table-bordered table-sm">
+  <thead>
     <tr><th>No. Control</th><th>Nombre</th><th>Área</th><th>Profesor</th><th>Acciones</th></tr>
   </thead>
   <tbody>
-    {% for a in alumnos %}
+  {% for a in alumnos %}
     <tr>
-      <td>{{ a.No_Control }}</td>
-      <td>{{ a.nombre }}</td>
-      <td>{{ a.area }}</td>
-      <td>{{ a.profesor }}</td>
+      <td>{{ a['No_Control'] }}</td>
+      <td>{{ a['nombre'] }}</td>
+      <td>{{ a['area'] }}</td>
+      <td>{{ a['profesor'] }}</td>
       <td>
-        <a href="{{ url_for('alumnos_edit', No_Control=a.No_Control) }}" class="btn btn-sm btn-warning">Editar</a>
-        <a href="{{ url_for('alumnos_delete', No_Control=a.No_Control) }}" class="btn btn-sm btn-danger"
-           onclick="return confirm('¿Eliminar alumno?');">Eliminar</a>
+        <a class="btn btn-sm btn-info" href="{{ url_for('alumnos_edit', No_Control=a['No_Control']) }}">Editar</a>
+        <a class="btn btn-sm btn-danger" href="{{ url_for('alumnos_delete', No_Control=a['No_Control']) }}">Eliminar</a>
       </td>
     </tr>
-    {% endfor %}
+  {% endfor %}
   </tbody>
 </table>
 {% endblock %}

@@ -1,27 +1,25 @@
 {% extends "layout.html" %}
-{% block title %}Usuarios{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
-  <h2>Usuarios</h2>
-  <a href="{{ url_for('usuarios_new') }}" class="btn btn-success">Nuevo Usuario</a>
-</div>
-<table class="table table-bordered">
-  <thead class="table-dark">
-    <tr><th>Correo</th><th>Rol</th><th>Área</th><th>Acciones</th></tr>
+<h2>Usuarios</h2>
+<a class="btn btn-primary mb-2" href="{{ url_for('usuarios_new') }}">Nuevo Usuario</a>
+<table class="table table-bordered table-sm">
+  <thead>
+    <tr>
+      <th>Correo</th><th>Rol</th><th>Área</th><th>Acciones</th>
+    </tr>
   </thead>
   <tbody>
-    {% for u in usuarios %}
+  {% for u in usuarios %}
     <tr>
-      <td>{{ u.correo }}</td>
-      <td>{{ u.rol }}</td>
-      <td>{{ u.area }}</td>
+      <td>{{ u['correo'] }}</td>
+      <td>{{ u['rol'] }}</td>
+      <td>{{ u['area'] }}</td>
       <td>
-        <a href="{{ url_for('usuarios_edit', correo=u.correo) }}" class="btn btn-sm btn-warning">Editar</a>
-        <a href="{{ url_for('usuarios_delete', correo=u.correo) }}" class="btn btn-sm btn-danger"
-           onclick="return confirm('¿Eliminar usuario?');">Eliminar</a>
+        <a class="btn btn-sm btn-info" href="{{ url_for('usuarios_edit', correo=u['correo']) }}">Editar</a>
+        <a class="btn btn-sm btn-danger" href="{{ url_for('usuarios_delete', correo=u['correo']) }}">Eliminar</a>
       </td>
     </tr>
-    {% endfor %}
+  {% endfor %}
   </tbody>
 </table>
 {% endblock %}

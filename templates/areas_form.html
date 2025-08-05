@@ -1,17 +1,16 @@
 {% extends "layout.html" %}
-{% block title %}{{ area.id and 'Editar' or 'Nueva' }} Área{% endblock %}
 {% block content %}
-<h2>{{ area.id and 'Editar' or 'Nueva' }} Área</h2>
+<h2>{{ area.get('id') and 'Editar' or 'Nueva' }} Área</h2>
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Nombre</label>
-    <input name="nombre" class="form-control" value="{{ area.nombre or '' }}" required>
+  <div class="form-group">
+    <label>Nombre</label>
+    <input class="form-control" name="nombre" required value="{{ area.get('nombre','') }}">
   </div>
-  <div class="mb-3">
-    <label class="form-label">Encargado (correo)</label>
-    <input name="encargado" class="form-control" value="{{ area.encargado or '' }}">
+  <div class="form-group">
+    <label>Encargado</label>
+    <input class="form-control" name="encargado" value="{{ area.get('encargado','') }}">
   </div>
-  <button class="btn btn-primary">Guardar</button>
-  <a href="{{ url_for('areas_list') }}" class="btn btn-secondary">Cancelar</a>
+  <button class="btn btn-success" type="submit">Guardar</button>
+  <a class="btn btn-secondary" href="{{ url_for('areas_list') }}">Cancelar</a>
 </form>
 {% endblock %}

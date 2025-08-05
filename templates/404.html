@@ -1,9 +1,6 @@
 {% extends "layout.html" %}
-{% block title %}No Encontrado{% endblock %}
 {% block content %}
-<div class="text-center">
-  <h1 class="display-4">404</h1>
-  <p>La página solicitada no existe.</p>
-  <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Volver al Dashboard</a>
-</div>
+<h2 class="mt-5">Página no encontrada (404)</h2>
+<p>La ruta a la que intentaste acceder no existe.</p>
+<a class="btn btn-primary" href="{{ url_for('dashboard') }}">Volver al inicio</a>
 {% endblock %}

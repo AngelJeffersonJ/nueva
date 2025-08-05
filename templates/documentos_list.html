@@ -1,38 +1,46 @@
 {% extends "layout.html" %}
-{% block title %}Configuración de Documentos{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h3>Configuración de Documentos</h3>
-  <a href="{{ url_for('documentos_new') }}" class="btn btn-success">
-    <i class="bi bi-plus-lg"></i> Nueva
-  </a>
-</div>
+<h2 class="mt-3 mb-4">Documentos de Alumnos</h2>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>No. Control</th>
-      <th>Alumno</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
+<!-- Botón "Nuevo" eliminado, ya que no existe la ruta 'documentos_new' -->
+{# <a href="{{ url_for('documentos_new') }}" class="btn btn-success">
+    Nuevo Documento
+</a> #}
+
+<table class="table table-bordered table-striped mt-3">
+    <thead>
+        <tr>
+            <th>No. Control</th>
+            <th>Nombre</th>
+            <th>Área</th>
+            <th>Profesor</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
     {% for d in documentos %}
-    <tr>
-      <td>{{ d['No_Control'] }}</td>
-      <td>
-        {% set alum = alumnos | selectattr('No_Control','equalto', d['No_Control']) | list %}
-        {{ alum and alum[0].nombre or '—' }}
-      </td>
-      <td class="text-nowrap">
-        <a href="{{ url_for('documentos_edit', no_control=d['No_Control']) }}" class="btn btn-sm btn-primary me-1">✎ Editar</a>
-        <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}" class="btn btn-sm btn-info me-1">📄 Solicitud</a>
-        <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-sm btn-warning me-1">1° Bimestre</a>
-        <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}" class="btn btn-sm btn-success me-1">🏁 Final</a>
-        <a href="{{ url_for('documentos_delete', no_control=d['No_Control']) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar?');">🗑️</a>
-      </td>
-    </tr>
+        <tr>
+            <td>{{ d['No_Control'] }}</td>
+            <td>
+                {% set alumno = (alumnos | selectattr('No_Control','equalto',d['No_Control']) | list).0 %}
+                {{ alumno['nombre'] if alumno else '' }}
+            </td>
+            <td>{{ alumno['area'] if alumno else '' }}</td>
+            <td>{{ alumno['profesor'] if alumno else '' }}</td>
+            <td>
+                <a href="{{ url_for('documentos_solicitud', no_control=d['No_Control']) }}" class="btn btn-sm btn-info">Solicitud</a>
+                <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-sm btn-secondary">Bimestral 1</a>
+                <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=2) }}" class="btn btn-sm btn-secondary">Bimestral 2</a>
+                <a href="{{ url_for('documentos_bimestral', no_control=d['No_Control'], num=3) }}" class="btn btn-sm btn-secondary">Bimestral 3</a>
+                <a href="{{ url_for('documentos_final', no_control=d['No_Control']) }}" class="btn btn-sm btn-success">Final</a>
+                <a href="{{ url_for('generar_solicitud', no_control=d['No_Control']) }}" class="btn btn-sm btn-primary">Descargar Solicitud</a>
+                <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=1) }}" class="btn btn-sm btn-primary">Descargar Bim 1</a>
+                <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=2) }}" class="btn btn-sm btn-primary">Descargar Bim 2</a>
+                <a href="{{ url_for('generar_bimestral', no_control=d['No_Control'], num=3) }}" class="btn btn-sm btn-primary">Descargar Bim 3</a>
+                <a href="{{ url_for('generar_final', no_control=d['No_Control']) }}" class="btn btn-sm btn-primary">Descargar Final</a>
+            </td>
+        </tr>
     {% endfor %}
-  </tbody>
+    </tbody>
 </table>
 {% endblock %}

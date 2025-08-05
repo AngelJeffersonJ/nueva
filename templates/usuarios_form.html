@@ -1,27 +1,24 @@
 {% extends "layout.html" %}
-{% block title %}{{ usuario.correo and 'Editar' or 'Nuevo' }} Usuario{% endblock %}
 {% block content %}
-<h2>{{ usuario.correo and 'Editar' or 'Nuevo' }} Usuario</h2>
+<h2>{{ usuario.get('correo') and 'Editar' or 'Nuevo' }} Usuario</h2>
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Correo</label>
-    <input type="email" name="correo" class="form-control"
-           value="{{ usuario.correo or '' }}"
-           {% if usuario.correo %}readonly{% endif %} required>
+  <div class="form-group">
+    <label>Correo</label>
+    <input class="form-control" name="correo" required value="{{ usuario.get('correo','') }}" {% if usuario.get('correo') %}readonly{% endif %}>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Rol</label>
-    <select name="rol" class="form-select" required>
+  <div class="form-group">
+    <label>Rol</label>
+    <select class="form-control" name="rol" required>
       {% for r in ['Administrador','Encargado','Maestro','Alumno'] %}
-        <option value="{{ r }}" {% if usuario.rol==r %}selected{% endif %}>{{ r }}</option>
+      <option value="{{ r }}" {% if usuario.get('rol','')==r %}selected{% endif %}>{{ r }}</option>
       {% endfor %}
     </select>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Área (opcional)</label>
-    <input type="text" name="area" class="form-control" value="{{ usuario.area or '' }}">
+  <div class="form-group">
+    <label>Área</label>
+    <input class="form-control" name="area" value="{{ usuario.get('area','') }}">
   </div>
-  <button class="btn btn-primary">Guardar</button>
-  <a href="{{ url_for('usuarios_list') }}" class="btn btn-secondary">Cancelar</a>
+  <button class="btn btn-success" type="submit">Guardar</button>
+  <a class="btn btn-secondary" href="{{ url_for('usuarios_list') }}">Cancelar</a>
 </form>
 {% endblock %}

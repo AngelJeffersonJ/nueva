@@ -1,27 +1,24 @@
 {% extends "layout.html" %}
-{% block title %}{{ alumno.get('No_Control') and 'Editar Alumno' or 'Nuevo Alumno' }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
-  <h3>{{ alumno.get('No_Control') and 'Editar Alumno' or 'Nuevo Alumno' }}</h3>
-</div>
+<h2>{{ alumno.get('No_Control') and 'Editar' or 'Nuevo' }} Alumno</h2>
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">No. de Control</label>
-    <input type="text" name="No_Control" class="form-control" value="{{ alumno.get('No_Control','') }}" {% if alumno.get('No_Control') %}readonly{% endif %} required>
+  <div class="form-group">
+    <label>No. Control</label>
+    <input class="form-control" name="No_Control" required value="{{ alumno.get('No_Control','') }}" {% if alumno.get('No_Control') %}readonly{% endif %}>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Nombre completo</label>
-    <input type="text" name="nombre" class="form-control" value="{{ alumno.get('nombre','') }}" required>
+  <div class="form-group">
+    <label>Nombre</label>
+    <input class="form-control" name="nombre" required value="{{ alumno.get('nombre','') }}">
   </div>
-  <div class="mb-3">
-    <label class="form-label">Área</label>
-    <input type="text" name="area" class="form-control" value="{{ alumno.get('area','') }}" required>
+  <div class="form-group">
+    <label>Área</label>
+    <input class="form-control" name="area" value="{{ alumno.get('area','') }}">
   </div>
-  <div class="mb-3">
-    <label class="form-label">Profesor (correo)</label>
-    <input type="email" name="profesor" class="form-control" value="{{ alumno.get('profesor','') }}" required>
+  <div class="form-group">
+    <label>Profesor</label>
+    <input class="form-control" name="profesor" value="{{ alumno.get('profesor','') }}">
   </div>
-  <button type="submit" class="btn btn-primary">Guardar</button>
-  <a href="{{ url_for('alumnos_list') }}" class="btn btn-secondary">Cancelar</a>
+  <button class="btn btn-success" type="submit">Guardar</button>
+  <a class="btn btn-secondary" href="{{ url_for('alumnos_list') }}">Cancelar</a>
 </form>
 {% endblock %}
