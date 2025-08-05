@@ -33,7 +33,6 @@ TPL_SOLICITUD  = os.path.join(TPL_DIR,'plantilla_solicitud_completa.docx')
 TPL_BIMESTRAL  = os.path.join(TPL_DIR,'Reporte_Bimestral_Plantilla.docx')
 TPL_FINAL      = os.path.join(TPL_DIR,'Reporte_Final_Lleno.docx')
 
-# Sinónimos de campos (personaliza según tus CSV y DOCX)
 FIELD_SYNONYMS = {
     'ap': 'Apellido_Paterno',
     'am': 'Apellido_Materno',
@@ -42,11 +41,7 @@ FIELD_SYNONYMS = {
     'carrera>': 'Carrera',
     'nombre_estudiante': 'Nombre',
 }
-
-# Campos de alumno
 ALUMNOS_FIELDS = ['No_Control','nombre','area','profesor']
-
-# Lista completa de campos (amplía según tus plantillas y necesidades)
 DOC_FIELDS = [
     'No_Control','Apellido_Paterno','Apellido_Materno','Nombre','Sexo','Telefono','Correo','Domicilio','Carrera',
     'Periodo','Semestre','Creditos','Dependencia','Domicilio_Dependencia','Titular_Dependencia','Cargo_Responsable',
@@ -67,7 +62,6 @@ DOC_FIELDS += [f'Aprendizaje{i}' for i in range(1,9)]
 DOC_FIELDS += [f'Beneficio{i}' for i in range(1,9)]
 DOC_FIELDS += ['Nombre_Responsable','Cargo_Responsable','Num_Control','Observaciones_Encargado','Observaciones_Estudiante']
 
-# --- UTILIDADES CSV ---
 def cargar_csv(path, expected_fields=None):
     rows = []
     if os.path.isfile(path):
@@ -94,7 +88,6 @@ def guardar_csv(path, rows, fieldnames):
         app.logger.error(f"Error guardando CSV: {e}")
         flash("No se pudo guardar el CSV","danger")
 
-# --- DECORADORES DE AUTENTICACIÓN ---
 def login_required(f):
     @wraps(f)
     def w(*args,**kw):
@@ -114,7 +107,6 @@ def roles_required(*roles):
         return w
     return deco
 
-# --- DOCX ---
 def _render_docx(template_path, context, filename):
     try:
         doc = DocxTemplate(template_path)
@@ -130,7 +122,6 @@ def _render_docx(template_path, context, filename):
         flash("Error generando el documento","danger")
         return redirect(url_for('dashboard'))
 
-# --- AUTENTICACIÓN AZURE ---
 @app.route('/login')
 def login():
     msal_app = msal.ConfidentialClientApplication(
@@ -180,7 +171,26 @@ def logout():
 def dashboard():
     return render_template('dashboard.html')
 
-# --- CRUD Usuarios/Áreas/Profesores/Alumnos (idénticos a lo anterior, OMITIDO por espacio, solo incluye rutas si no las tienes) ---
+# CRUD Usuarios/Áreas/Profesores/Alumnos
+@app.route('/usuarios')
+@login_required
+def usuarios_list():
+    return render_template('usuarios_list.html', usuarios=cargar_csv(USERS_CSV))
+
+@app.route('/areas')
+@login_required
+def areas_list():
+    return render_template('areas_list.html', areas=cargar_csv(AREAS_CSV))
+
+@app.route('/profesores')
+@login_required
+def profesores_list():
+    return render_template('profesores_list.html', profesores=cargar_csv(PROFESORES_CSV))
+
+@app.route('/alumnos')
+@login_required
+def alumnos_list():
+    return render_template('alumnos_list.html', alumnos=cargar_csv(ALUMNOS_CSV))
 
 # --- CRUD DOCUMENTOS ---
 @app.route('/documentos')
@@ -201,7 +211,6 @@ def documentos_solicitud(no_control):
         doc['No_Control'] = no_control
         docs.append(doc)
     if request.method == 'POST':
-        # GUARDAR TODOS LOS CAMPOS SIEMPRE
         for f in DOC_FIELDS:
             doc[f] = request.form.get(f, doc.get(f, ''))
         guardar_csv(DOCUMENTOS_CSV, docs, DOC_FIELDS)
@@ -286,7 +295,6 @@ def generar_final(no_control):
     doci['Nombre_Estudiante'] = doci.get('Nombre',alum.get('Nombre',''))
     return _render_docx(TPL_FINAL,{**alum,**doci},f"Final_{no_control}.docx")
 
-# --- Error 404 ---
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html'),404
