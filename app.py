@@ -433,6 +433,7 @@ def documentos_solicitud(no_control):
         return redirect(url_for('documentos_list'))
     return render_template('solicitud_form.html', no_control=no_control, documento=doc or {})
 
+
 @app.route('/documentos/bimestral/<no_control>/<int:num>', methods=['GET','POST'])
 @login_required
 def documentos_bimestral(no_control,num):

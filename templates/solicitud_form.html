@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Solicitud de Servicio Social</h2>
+  <form method="post" autocomplete="off">
+    <input type="hidden" name="No_Control" value="{{ no_control }}">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Apellido Paterno</label>
+        <input type="text" class="form-control" name="Apellido_Paterno" value="{{ documento.Apellido_Paterno|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Apellido Materno</label>
+        <input type="text" class="form-control" name="Apellido_Materno" value="{{ documento.Apellido_Materno|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Nombre(s)</label>
+        <input type="text" class="form-control" name="Nombre" value="{{ documento.Nombre|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Sexo</label>
+        <input type="text" class="form-control" name="Sexo" value="{{ documento.Sexo|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Teléfono</label>
+        <input type="text" class="form-control" name="Telefono" value="{{ documento.Telefono|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Correo</label>
+        <input type="email" class="form-control" name="Correo" value="{{ documento.Correo|default('') }}">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label>Domicilio</label>
+      <input type="text" class="form-control" name="Domicilio" value="{{ documento.Domicilio|default('') }}">
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Carrera</label>
+        <input type="text" class="form-control" name="Carrera" value="{{ documento.Carrera|default('') }}">
+      </div>
+      <div class="col-md-3 mb-3">
+        <label>Periodo</label>
+        <input type="text" class="form-control" name="Periodo" value="{{ documento.Periodo|default('') }}">
+      </div>
+      <div class="col-md-3 mb-3">
+        <label>Semestre</label>
+        <input type="text" class="form-control" name="Semestre" value="{{ documento.Semestre|default('') }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Créditos</label>
+        <input type="text" class="form-control" name="Creditos" value="{{ documento.Creditos|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Dependencia</label>
+        <input type="text" class="form-control" name="Dependencia" value="{{ documento.Dependencia|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Domicilio de Dependencia</label>
+        <input type="text" class="form-control" name="Domicilio_Dependencia" value="{{ documento.Domicilio_Dependencia|default('') }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Titular de Dependencia</label>
+        <input type="text" class="form-control" name="Titular_Dependencia" value="{{ documento.Titular_Dependencia|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Cargo del Responsable</label>
+        <input type="text" class="form-control" name="Cargo_Responsable" value="{{ documento.Cargo_Responsable|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Responsable del Proyecto</label>
+        <input type="text" class="form-control" name="Responsable_Proyecto" value="{{ documento.Responsable_Proyecto|default('') }}">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label>Nombre del Programa</label>
+      <input type="text" class="form-control" name="Nombre_Programa" value="{{ documento.Nombre_Programa|default('') }}">
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Modalidad Externa</label>
+        <input type="text" class="form-control" name="Modalidad_Externa" value="{{ documento.Modalidad_Externa|default('') }}">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>Modalidad Interna</label>
+        <input type="text" class="form-control" name="Modalidad_Interna" value="{{ documento.Modalidad_Interna|default('') }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Fecha de Inicio</label>
+        <input type="date" class="form-control" name="Fecha_Inicio" value="{{ documento.Fecha_Inicio|default('') }}">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>Fecha de Terminación</label>
+        <input type="date" class="form-control" name="Fecha_Terminacion" value="{{ documento.Fecha_Terminacion|default('') }}">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label>Actividades</label>
+      <input type="text" class="form-control" name="Actividades" value="{{ documento.Actividades|default('') }}">
+    </div>
+    <div class="mb-3">
+      <label>Tipo de Proyecto (solo una opción con X)</label>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Edu_Adultos" id="TP_Edu_Adultos" value="X" {% if documento.TP_Edu_Adultos == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Edu_Adultos">Educación de Adultos</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Desarrollo" id="TP_Desarrollo" value="X" {% if documento.TP_Desarrollo == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Desarrollo">Desarrollo</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Deportivo" id="TP_Deportivo" value="X" {% if documento.TP_Deportivo == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Deportivo">Deportivo</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Cultural" id="TP_Cultural" value="X" {% if documento.TP_Cultural == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Cultural">Cultural</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Civico" id="TP_Civico" value="X" {% if documento.TP_Civico == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Civico">Cívico</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Sustentable" id="TP_Sustentable" value="X" {% if documento.TP_Sustentable == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Sustentable">Sustentable</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Salud" id="TP_Salud" value="X" {% if documento.TP_Salud == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Salud">Salud</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Medio_Amb" id="TP_Medio_Amb" value="X" {% if documento.TP_Medio_Amb == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Medio_Amb">Medio Ambiente</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="TP_Otros" id="TP_Otros" value="X" {% if documento.TP_Otros == 'X' %}checked{% endif %}>
+        <label class="form-check-label" for="TP_Otros">Otros</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Día de Solicitud</label>
+        <input type="text" class="form-control" name="Dia_Solicitud" value="{{ documento.Dia_Solicitud|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Mes de Solicitud</label>
+        <input type="text" class="form-control" name="Mes_Solicitud" value="{{ documento.Mes_Solicitud|default('') }}">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Año de Solicitud</label>
+        <input type="text" class="form-control" name="Anio_Solicitud" value="{{ documento.Anio_Solicitud|default('') }}">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar Solicitud</button>
+    <a href="{{ url_for('documentos_list') }}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
